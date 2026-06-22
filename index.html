@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>أسعار الذهب والفضة والبيتكوين - الأردن</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">مقابل الدينار الأردني</p>
+        <h1>مؤشر الذهب والفضة والبيتكوين</h1>
+        <p class="sub">سعر اليوم، أمس، المتوسطات، القمم والقيعان خلال أسبوع، شهر، 3 أشهر، 6 أشهر وسنة.</p>
+      </div>
+      <button id="themeBtn" class="icon-btn" aria-label="تبديل الوضع">☾</button>
+    </header>
+
+    <section class="toolbar card">
+      <div>
+        <span class="muted">آخر تحديث</span>
+        <strong id="lastUpdate">--</strong>
+      </div>
+      <button id="refreshBtn" class="primary-btn">تحديث الأسعار</button>
+    </section>
+
+    <main>
+      <section id="assetsGrid" class="assets-grid"></section>
+
+      <section class="card detail-card">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">التحليل التفصيلي</p>
+            <h2 id="selectedTitle">اختر أصلاً</h2>
+          </div>
+          <select id="assetSelect" class="select"></select>
+        </div>
+
+        <div class="smart-row" id="smartInsights"></div>
+
+        <div class="chart-wrap">
+          <canvas id="chart" width="900" height="360"></canvas>
+        </div>
+        <div class="range-tabs" id="rangeTabs"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>الفترة</th>
+                <th>أعلى سعر</th>
+                <th>مقارنة باليوم</th>
+                <th>أدنى سعر</th>
+                <th>مقارنة باليوم</th>
+              </tr>
+            </thead>
+            <tbody id="statsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card compare-card">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">المقارنة الشخصية</p>
+            <h2>أدخل سعرك أنت</h2>
+          </div>
+        </div>
+        <div class="input-row">
+          <select id="compareAsset" class="select"></select>
+          <input id="customPrice" type="number" inputmode="decimal" placeholder="مثلاً 2350" />
+          <button id="saveCompare" class="primary-btn">حفظ</button>
+        </div>
+        <div id="compareResult" class="compare-result"></div>
+        <div id="savedComparisons" class="saved-list"></div>
+      </section>
+
+      <section class="card note-card">
+        <h2>مصدر الأسعار</h2>
+        <p>هذه النسخة تعمل فوراً ببيانات تجريبية ذكية للتصميم والاختبار. عند الربط الحقيقي نضع رابط Cloudflare Worker في ملف <b>js/api.js</b> ليجلب: XAU، XAG، BTC مقابل JOD.</p>
+      </section>
+    </main>
+  </div>
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
