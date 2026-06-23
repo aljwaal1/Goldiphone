@@ -6,8 +6,22 @@ const ranges = [
 let market, selected='gold', chartRange='30d';
 
 const el = id => document.getElementById(id);
-const formatNumber = n => new Intl.NumberFormat('ar-JO', { maximumFractionDigits: n > 1000 ? 0 : 2 }).format(n);
-const pct = n => `${n>0?'+':''}${n.toFixed(2)}%`;
+
+// نجبر كل الأرقام في التطبيق أن تظهر بالإنجليزية 0-9 وليس ٠١٢٣ أو ۰۱۲۳.
+const toEnglishDigits = value => String(value)
+  .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+  .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+
+const formatNumber = n => toEnglishDigits(new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: Math.abs(Number(n)) > 1000 ? 0 : 2
+}).format(Number(n) || 0));
+
+const formatDateTime = value => toEnglishDigits(new Intl.DateTimeFormat('en-GB', {
+  year:'numeric', month:'2-digit', day:'2-digit',
+  hour:'2-digit', minute:'2-digit', hour12:true
+}).format(new Date(value)));
+
+const pct = n => toEnglishDigits(`${n>0?'+':''}${Number(n).toFixed(2)}%`);
 const diffText = (current, ref) => {
   const d = current - ref, p = ref ? d/ref*100 : 0;
   return `<span class="${d>=0?'up':'down'}">${d>=0?'+':''}${formatNumber(d)} د.أ (${pct(p)})</span>`;
@@ -27,7 +41,7 @@ async function load(){
   renderAll();
 }
 function renderAll(){
-  el('lastUpdate').textContent = new Date(market.updatedAt).toLocaleString('ar-JO');
+  el('lastUpdate').textContent = formatDateTime(market.updatedAt) + (market.real ? ' • أسعار حقيقية' : market.demo ? ' • بيانات تجريبية' : market.offline ? ' • آخر نسخة محفوظة' : '');
   renderSelectors(); renderCards(); renderDetails(); renderComparisons();
 }
 function renderSelectors(){
@@ -88,4 +102,15 @@ function renderComparisons(){
   }).join('');
 }
 function removeComparison(i){ const list=Store.get('comparisons',[]); list.splice(i,1); Store.set('comparisons',list); renderComparisons(); }
+// حماية إضافية: أي رقم يظهر لاحقاً من المتصفح أو API يتحول فوراً إلى 0-9.
+const digitObserver = new MutationObserver(() => {
+  document.querySelectorAll('body *').forEach(node => {
+    if (node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE) {
+      const fixed = toEnglishDigits(node.textContent);
+      if (fixed !== node.textContent) node.textContent = fixed;
+    }
+  });
+});
+digitObserver.observe(document.body, { childList:true, subtree:true, characterData:true });
+
 init();
