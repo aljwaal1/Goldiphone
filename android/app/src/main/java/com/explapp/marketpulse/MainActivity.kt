@@ -30,7 +30,7 @@ class MainActivity : Activity() {
             allowFileAccess = false
             allowContentAccess = false
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            userAgentString = "$userAgentString MarketPulseAndroid/1.0"
+            userAgentString = "$userAgentString MarketPulseAndroid/1.1"
         }
         setContentView(webView)
 
