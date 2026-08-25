@@ -199,6 +199,11 @@ class MainActivity : Activity() {
     }
 
     private fun showWebApp(savedInstanceState: Bundle?) {
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Color.rgb(8, 9, 19))
+        }
+
         webView = WebView(this)
         webView.setBackgroundColor(Color.rgb(8, 9, 19))
         webView.webViewClient = WebViewClient()
@@ -213,11 +218,42 @@ class MainActivity : Activity() {
             allowFileAccess = false
             allowContentAccess = false
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            userAgentString = "$userAgentString MarketPulseAndroid/1.3"
+            userAgentString = "$userAgentString MarketPulseAndroid/1.4"
         }
         webView.clearCache(true)
-        setContentView(webView)
-        if (savedInstanceState == null) webView.loadUrl("https://aljwaal1.github.io/Goldiphone/?app=android&v=7")
+
+        root.addView(webView, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            0,
+            1f
+        ))
+
+        val contactBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(dp(12), dp(7), dp(12), dp(7))
+            setBackgroundColor(Color.rgb(10, 12, 24))
+        }
+        val contactButton = Button(this).apply {
+            text = "✉  مراسلة المطور"
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            setTypeface(typeface, Typeface.BOLD)
+            isAllCaps = false
+            background = gradient(Color.rgb(82, 67, 155), Color.rgb(45, 157, 190), 26f)
+            setOnClickListener { contactDeveloper() }
+        }
+        contactBar.addView(contactButton, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            dp(46)
+        ))
+        root.addView(contactBar, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            dp(60)
+        ))
+
+        setContentView(root)
+        if (savedInstanceState == null) webView.loadUrl("https://aljwaal1.github.io/Goldiphone/?app=android&v=8")
         else webView.restoreState(savedInstanceState)
     }
 
