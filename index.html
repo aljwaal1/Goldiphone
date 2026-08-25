@@ -2,571 +2,64 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<meta name="theme-color" content="#0B0F17">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#090A13">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="مؤشر الأسعار">
+<meta name="apple-mobile-web-app-title" content="مؤشر الأسواق">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="icon" href="icon-192.png">
-<title>مؤشر الذهب والفضة والبتكوين — الأردن</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<title>مؤشر الأسواق — ذهب وعملات</title>
 <style>
-  :root{
-    --bg0:#0B0F17; --bg1:#0E1320; --card:#121826; --card2:#161E2E;
-    --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
-    --ink:#F1F4F8; --muted:#8B96A8; --muted2:#5C6779;
-    --gold:#E3B23C; --gold-deep:#8A6A14;
-    --silver:#C9D3DE; --silver-deep:#6B7785;
-    --btc:#F7931A; --btc-deep:#A85F0C;
-    --green:#3DDC84; --red:#FF5C72;
-    --shadow:0 18px 50px rgba(0,0,0,.45);
-    --radius:20px;
-    color-scheme: dark;
-  }
-  [data-theme="light"]{
-    --bg0:#F3F1EA; --bg1:#EDEAE0; --card:#FFFFFF; --card2:#FBF9F3;
-    --line:#E4E0D2; --line2:#D8D3C2;
-    --ink:#181B22; --muted:#6B7484; --muted2:#92989F;
-    --shadow:0 14px 36px rgba(30,30,20,.10);
-    color-scheme: light;
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-  html,body{margin:0;background:radial-gradient(circle at 15% -10%, rgba(227,178,60,.10), transparent 40%), radial-gradient(circle at 100% 0%, rgba(247,147,26,.07), transparent 35%), var(--bg0);color:var(--ink);font-family:"Cairo",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;}
-  body{padding-bottom:max(24px, env(safe-area-inset-bottom));transition:background .25s,color .25s}
-  .mono{font-family:"JetBrains Mono","Cairo",monospace}
-  .wrap{max-width:720px;margin:0 auto;padding:18px 16px 8px}
-
-  /* ===== Header ===== */
-  .hero{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
-  .brand{display:flex;align-items:center;gap:10px}
-  .brand-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--btc));display:flex;align-items:center;justify-content:center;font-weight:900;color:#0B0F17;font-size:16px;flex-shrink:0;box-shadow:0 6px 18px rgba(227,178,60,.25)}
-  .hero h1{font-size:17px;font-weight:900;margin:0;letter-spacing:-.2px}
-  .hero .sub{font-size:11.5px;color:var(--muted);margin-top:2px}
-  .hero-actions{display:flex;gap:8px}
-  .iconbtn{width:38px;height:38px;border-radius:11px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);box-shadow:var(--shadow)}
-  .iconbtn.spin svg{animation:spin .9s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* ===== FX bar ===== */
-  .fxbar{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:14px;box-shadow:var(--shadow)}
-  .fxbar .lbl{font-size:11.5px;color:var(--muted);flex:1;line-height:1.5}
-  .fxbar input{width:84px;border:1px solid var(--line2);border-radius:10px;padding:7px 8px;font-family:"JetBrains Mono";font-size:13.5px;font-weight:700;color:var(--ink);background:var(--card2);text-align:center}
-
-  /* ===== Summary tiles ===== */
-  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-  .tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 10px;cursor:pointer;position:relative;overflow:hidden;transition:.15s transform,.15s border-color;box-shadow:var(--shadow)}
-  .tile:active{transform:scale(.97)}
-  .tile.selected{border-color:var(--accent)}
-  .tile::after{content:"";position:absolute;inset-inline-start:0;top:0;height:3px;width:100%;background:var(--accent)}
-  .tile .tname{font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:6px}
-  .tile .tprice{font-size:15.5px;font-weight:900;font-family:"JetBrains Mono"}
-  .tile .tdelta{font-size:10.5px;font-weight:800;margin-top:5px}
-  .tile.gold{--accent:var(--gold)}
-  .tile.silver{--accent:var(--silver)}
-  .tile.btc{--accent:var(--btc)}
-
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
-  .card-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-  .card-title .eyebrow{font-size:10.5px;color:var(--accent, var(--gold));font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin:0 0 3px}
-  .card-title h2{font-size:16px;font-weight:900;margin:0}
-
-  .seg{display:flex;gap:6px;background:var(--card2);border-radius:12px;padding:4px}
-  .seg button{flex:1;border:none;background:none;color:var(--muted);font-family:inherit;font-weight:800;font-size:12.5px;padding:8px 6px;border-radius:9px;cursor:pointer}
-  .seg button.active{background:var(--ink);color:var(--bg0)}
-  [data-theme="light"] .seg button.active{background:var(--ink);color:#fff}
-
-  .range-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
-  .range-tabs::-webkit-scrollbar{display:none}
-  .rtab{flex-shrink:0;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-family:inherit;font-weight:800;font-size:12px;padding:7px 13px;border-radius:999px;cursor:pointer}
-  .rtab.active{background:var(--accent);border-color:var(--accent);color:#0B0F17}
-
-  .chart-wrap{position:relative;margin-bottom:10px}
-  canvas{width:100%;height:auto;display:block}
-  .chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12.5px;color:var(--muted);text-align:center;padding:0 30px}
-
-  .insights{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
-  .insight{background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:10px 11px}
-  .insight .lbl{font-size:10.5px;color:var(--muted);font-weight:700;margin-bottom:4px}
-  .insight .val{font-size:14px;font-weight:900;font-family:"JetBrains Mono"}
-  .insight .extra{font-size:10.5px;color:var(--muted);margin-top:3px}
-  .up{color:var(--green)} .down{color:var(--red)} .flat{color:var(--muted)}
-
-  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
-  table{width:100%;border-collapse:collapse;min-width:520px;font-size:12.5px}
-  th,td{text-align:center;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-  th{color:var(--muted);font-weight:800;font-size:11px;background:var(--card2)}
-  tr:last-child td{border-bottom:none}
-  td.lbl-cell{color:var(--muted);font-weight:700;text-align:right}
-
-  .data-note{font-size:11px;color:var(--muted2);margin-top:10px;line-height:1.7;display:flex;gap:6px;align-items:flex-start}
-
-  /* ===== Compare ===== */
-  .cmp-form{display:grid;grid-template-columns:1fr 110px;gap:8px;margin-bottom:10px}
-  .cmp-form input,.cmp-form select{border:1px solid var(--line2);border-radius:11px;padding:10px;font-family:inherit;font-size:13.5px;background:var(--card2);color:var(--ink)}
-  .cmp-form .full{grid-column:1/-1}
-  .cmp-savebtn{grid-column:1/-1;border:none;background:linear-gradient(135deg,var(--gold),var(--btc));color:#0B0F17;font-weight:900;font-size:13.5px;padding:11px;border-radius:11px;cursor:pointer}
-  .cmp-row{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 11px;margin-bottom:7px}
-  .cmp-row .meta{flex:1;min-width:0}
-  .cmp-row .meta b{font-size:12.5px;display:block}
-  .cmp-row .meta small{color:var(--muted);font-size:11px}
-  .cmp-row .diff{font-size:12px;font-weight:800;white-space:nowrap;font-family:"JetBrains Mono"}
-  .cmp-row .del{background:none;border:none;color:var(--red);font-size:15px;cursor:pointer;padding:2px 4px;flex-shrink:0}
-  .empty-note{font-size:12px;color:var(--muted);text-align:center;padding:10px 0}
-
-  .footer{font-size:11px;color:var(--muted2);padding:8px 18px 4px;line-height:1.8;text-align:center}
-  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg0);padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;opacity:0;transition:opacity .25s;z-index:60;pointer-events:none;max-width:88%;text-align:center}
-  .toast.show{opacity:1}
-  .skel{background:linear-gradient(90deg,var(--line) 25%,var(--card2) 37%,var(--line) 63%);background-size:400% 100%;animation:sk 1.3s ease infinite;border-radius:8px}
-  @keyframes sk{0%{background-position:100% 50%}100%{background-position:0 50%}}
+:root{--bg:#090a13;--bg2:#101324;--card:rgba(19,22,41,.78);--line:rgba(255,255,255,.10);--ink:#f7f7ff;--muted:#969bb3;--gold:#ffd05a;--violet:#9c7cff;--cyan:#46d9ff;--green:#46e6a4;--red:#ff6b86;--orange:#ff9c4a;--shadow:0 20px 60px rgba(0,0,0,.34);color-scheme:dark}
+[data-theme="light"]{--bg:#f7f5ff;--bg2:#ece9fb;--card:rgba(255,255,255,.88);--line:rgba(30,31,48,.10);--ink:#171927;--muted:#73778c;--shadow:0 18px 45px rgba(72,60,110,.13);color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink);background:var(--bg)}body{padding-bottom:max(28px,env(safe-area-inset-bottom));overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 12% -5%,rgba(156,124,255,.24),transparent 34%),radial-gradient(circle at 94% 2%,rgba(70,217,255,.17),transparent 30%),radial-gradient(circle at 50% 100%,rgba(255,208,90,.10),transparent 35%);z-index:0}.wrap{position:relative;z-index:1;max-width:980px;margin:auto;padding:16px}
+.hero{padding:18px 2px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:17px;display:grid;place-items:center;font-weight:1000;color:#15101d;background:linear-gradient(135deg,var(--gold),#ff9a4b 50%,var(--violet));box-shadow:0 12px 30px rgba(255,190,75,.22)}h1{font-size:20px;margin:0;font-weight:950;letter-spacing:-.5px}.sub{margin-top:4px;font-size:11.5px;color:var(--muted)}.actions{display:flex;gap:8px}.iconbtn{width:42px;height:42px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font-size:18px;backdrop-filter:blur(18px);box-shadow:var(--shadow)}
+.heroCard{border:1px solid var(--line);background:linear-gradient(135deg,rgba(255,208,90,.16),rgba(156,124,255,.14),rgba(70,217,255,.10));border-radius:26px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow);backdrop-filter:blur(24px);overflow:hidden;position:relative}.heroCard:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;left:-70px;top:-100px;background:rgba(255,255,255,.09);filter:blur(4px)}.heroLine{display:flex;justify-content:space-between;gap:10px;align-items:flex-end}.eyebrow{font-size:11px;color:var(--gold);font-weight:900}.big{font-size:32px;font-weight:1000;margin-top:5px;letter-spacing:-1.2px}.status{font-size:11px;color:var(--muted);text-align:left}.status b{display:block;color:var(--green);font-size:12px;margin-bottom:3px}
+.sectionHead{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 9px}.sectionHead h2{font-size:16px;margin:0}.sectionHead small{font-size:10.5px;color:var(--muted)}
+.marketGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.market{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:20px;background:var(--card);padding:14px 13px;min-height:112px;backdrop-filter:blur(20px);box-shadow:var(--shadow);cursor:pointer}.market:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--accent)}.market.selected{border-color:color-mix(in srgb,var(--accent) 65%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 25%,transparent),var(--shadow)}.mn{font-size:11px;color:var(--muted);font-weight:800}.mi{font-size:21px;float:left}.mp{font-size:18px;font-weight:950;margin-top:9px;direction:ltr;text-align:right}.md{font-size:10.5px;font-weight:850;margin-top:6px}.up{color:var(--green)}.down{color:var(--red)}.flat{color:var(--muted)}
+.currencyScroller{display:flex;gap:9px;overflow:auto;padding:2px 0 7px;scrollbar-width:none}.currencyScroller::-webkit-scrollbar{display:none}.fx{flex:0 0 142px;border:1px solid var(--line);background:var(--card);border-radius:19px;padding:13px;backdrop-filter:blur(18px);box-shadow:var(--shadow);cursor:pointer}.fx.selected{border-color:var(--cyan)}.fxTop{display:flex;justify-content:space-between;align-items:center}.flag{font-size:22px}.code{font-weight:950;font-size:13px}.fxName{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fxVal{font-weight:950;font-size:16px;margin-top:10px;direction:ltr;text-align:right}.fxHint{font-size:9.5px;color:var(--muted);margin-top:4px}
+.card{border:1px solid var(--line);background:var(--card);border-radius:24px;padding:16px;margin-top:12px;backdrop-filter:blur(24px);box-shadow:var(--shadow)}.detailHead{display:flex;justify-content:space-between;gap:10px;align-items:center}.detailTitle b{font-size:17px;display:block}.detailTitle span{font-size:10.5px;color:var(--muted)}.pill{padding:7px 11px;border-radius:999px;background:rgba(70,217,255,.10);border:1px solid rgba(70,217,255,.22);font-size:10.5px;color:var(--cyan);font-weight:850}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}.metric{border:1px solid var(--line);border-radius:16px;padding:10px;background:rgba(255,255,255,.025)}.metric span{font-size:9.5px;color:var(--muted);display:block;margin-bottom:5px}.metric b{font-size:13px;display:block}.chartBox{margin-top:14px;border:1px solid var(--line);border-radius:18px;padding:10px;background:rgba(5,7,16,.18)}canvas{display:block;width:100%;height:auto}.rangeTabs{display:flex;gap:7px;overflow:auto;margin-top:12px;scrollbar-width:none}.rangeTabs button{border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--muted);border-radius:999px;padding:8px 12px;font:inherit;font-size:10.5px;font-weight:850;white-space:nowrap}.rangeTabs button.active{color:#111;background:linear-gradient(135deg,var(--gold),var(--orange));border-color:transparent}
+.tableWrap{overflow:auto;margin-top:14px;border:1px solid var(--line);border-radius:18px}table{width:100%;border-collapse:collapse;min-width:620px}th,td{padding:11px 10px;border-bottom:1px solid var(--line);font-size:11px;text-align:center;white-space:nowrap}th{color:var(--muted);background:rgba(255,255,255,.035);font-size:10px}tr:last-child td{border:0}.period{text-align:right;font-weight:900}.todayRow{background:linear-gradient(90deg,rgba(255,208,90,.10),transparent)}.source{font-size:10px;line-height:1.7;color:var(--muted);margin-top:11px}.footer{text-align:center;color:var(--muted);font-size:9.5px;line-height:1.8;padding:18px 10px}.toast{position:fixed;z-index:9;bottom:24px;left:50%;transform:translateX(-50%) translateY(18px);opacity:0;padding:10px 16px;border-radius:999px;background:#fff;color:#111;font-size:11px;font-weight:900;transition:.25s;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:720px){.marketGrid{grid-template-columns:repeat(3,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}.market{padding:12px 10px}.mp{font-size:15px}.big{font-size:27px}}@media(max-width:430px){.wrap{padding:12px}.marketGrid{gap:7px}.market{min-height:104px;border-radius:17px}.mn{font-size:9.5px}.mi{font-size:18px}.mp{font-size:13.5px}.md{font-size:9px}.fx{flex-basis:132px}.heroCard{border-radius:22px}}
 </style>
 </head>
 <body data-theme="dark">
 <div class="wrap">
-
-  <div class="hero">
-    <div class="brand">
-      <div class="brand-mark">JD</div>
-      <div>
-        <h1>مؤشر الذهب والفضة والبتكوين</h1>
-        <div class="sub" id="lastUpdateLbl">جارِ التحميل...</div>
-      </div>
-    </div>
-    <div class="hero-actions">
-      <button class="iconbtn" id="themeBtn" aria-label="تبديل المظهر">
-        <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <button class="iconbtn" id="refreshBtn" aria-label="تحديث">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 11A8 8 0 1 0 18.5 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 5v6h-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <div class="fxbar">
-    <div class="lbl">سعر الصرف الرسمي (دينار لكل دولار)<br>الربط ثابت تقريبًا منذ 1995</div>
-    <input type="number" id="fxInput" step="0.0001" value="0.7090">
-  </div>
-
-  <div class="tiles" id="tilesHost"></div>
-
-  <div class="card">
-    <div class="card-title">
-      <div><p class="eyebrow">التحليل التفصيلي</p><h2 id="detailTitle">الذهب</h2></div>
-      <div class="seg" id="assetSeg"></div>
-    </div>
-
-    <div class="insights" id="insightsHost"></div>
-
-    <div class="range-tabs" id="rangeTabs"></div>
-    <div class="chart-wrap">
-      <canvas id="chart" width="900" height="320"></canvas>
-      <div class="chart-empty" id="chartEmpty" style="display:none"></div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>الفترة</th><th>أعلى</th><th>فرق اليوم</th><th>أدنى</th><th>فرق اليوم</th></tr></thead>
-        <tbody id="statsBody"></tbody>
-      </table>
-    </div>
-    <div class="data-note" id="historyNote"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title"><div><p class="eyebrow">المقارنة الشخصية</p><h2>قارن بسعرك أنت</h2></div></div>
-    <div class="cmp-form">
-      <select id="cmpAsset"></select>
-      <input id="cmpPrice" type="number" inputmode="decimal" step="0.001" placeholder="السعر (د.أ)">
-      <input id="cmpLabel" class="full" type="text" placeholder="تسمية اختيارية (مثلاً: صائغ وسط البلد)">
-      <button class="cmp-savebtn" id="cmpSave">حفظ المقارنة</button>
-    </div>
-    <div id="cmpList"></div>
-  </div>
-
-  <div class="footer">
-    الأسعار اللحظية من مصدر عالمي بدون مفتاح (gold-api.com) ثم تُحوَّل للدينار بسعر الربط الرسمي. سعر البتكوين التاريخي الكامل (سنة) من CoinGecko عند توفره. تاريخ الذهب والفضة يُبنى تلقائيًا من لقطة يومية تُحفظ على جهازك — لا تُستخدم أي بيانات تجريبية أو مُختلقة في هذا التطبيق مهما حدث؛ إن تعذّر الجلب تظهر "بيانات غير كافية" بصراحة.
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
+<header class="hero"><div class="brand"><div class="logo">M+</div><div><h1>مؤشر الأسواق</h1><div class="sub">ذهب • فضة • بيتكوين • عملات عربية وعالمية</div></div></div><div class="actions"><button class="iconbtn" id="themeBtn">◐</button><button class="iconbtn" id="refreshBtn">↻</button></div></header>
+<section class="heroCard"><div class="heroLine"><div><div class="eyebrow">نظرة سريعة على السوق</div><div class="big" id="heroPrice">جارِ التحديث…</div></div><div class="status"><b id="marketStatus">● مباشر</b><span id="lastUpdate">—</span></div></div></section>
+<div class="sectionHead"><h2>المعادن والأصول</h2><small>اضغط للتحليل</small></div><div class="marketGrid" id="marketGrid"></div>
+<div class="sectionHead"><h2>العملات</h2><small>مقابل 1 دولار أمريكي</small></div><div class="currencyScroller" id="currencyScroller"></div>
+<section class="card"><div class="detailHead"><div class="detailTitle"><b id="detailName">الذهب</b><span id="detailSub">التحليل التاريخي</span></div><div class="pill" id="detailBadge">365 يوم</div></div><div class="metrics" id="metrics"></div><div class="rangeTabs" id="rangeTabs"></div><div class="chartBox"><canvas id="chart" width="900" height="300"></canvas></div><div class="tableWrap"><table><thead><tr><th>الفترة</th><th>السعر</th><th>الفرق عن اليوم</th><th>التغير</th><th>تاريخ النقطة</th></tr></thead><tbody id="analysisRows"></tbody></table></div><div class="source" id="sourceNote"></div></section>
+<div class="footer">الأسعار معلوماتية وقد تختلف قليلًا بين مزودي البيانات والأسواق. العملات من Frankfurter، والأسعار اللحظية للذهب والفضة من Gold API، والبيانات التاريخية للمعادن من Stooq.</div>
+</div><div class="toast" id="toast"></div>
 <script>
-/* ============================ الإعدادات ============================ */
-const PRICE_API = "https://api.gold-api.com/price/";
-const COINGECKO_HIST = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=365&interval=daily";
-const FX_KEY = "jm_fx_v1", THEME_KEY = "jm_theme_v1", HIST_KEY = "jm_hist_v2", COMPARE_KEY = "jm_compare_v2", BTC_HIST_TS_KEY = "jm_btc_hist_ts_v1";
-
-const ASSETS = [
-  { id:"XAU", cls:"gold",   name:"الذهب",    unit:"أونصة", decimals:2 },
-  { id:"XAG", cls:"silver", name:"الفضة",    unit:"أونصة", decimals:3 },
-  { id:"BTC", cls:"btc",    name:"بيتكوين",  unit:"عملة",  decimals:0 },
-];
-const RANGES = [
-  { key:"7d",  label:"أسبوع",   days:7 },
-  { key:"30d", label:"شهر",     days:30 },
-  { key:"90d", label:"3 أشهر",  days:90 },
-  { key:"180d",label:"6 أشهر",  days:180 },
-  { key:"365d",label:"سنة",     days:365 },
-];
-
-let fx = parseFloat(localStorage.getItem(FX_KEY)) || 0.7090;
-let liveUSD = {};
-let selectedAsset = "XAU";
-let chartRange = "30d";
-
-/* ============================ أدوات عامة ============================ */
-function fmt(n, dp=2){ if(n==null||isNaN(n)) return "—"; return Number(n).toLocaleString("en-US",{minimumFractionDigits:dp,maximumFractionDigits:dp}); }
-function pctStr(n){ if(n==null||isNaN(n)) return "—"; return `${n>=0?"+":""}${fmt(n,1)}٪`; }
-function todayKey(d=new Date()){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
-function toast(msg){
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.classList.add("show");
-  clearTimeout(window._tt); window._tt = setTimeout(()=>t.classList.remove("show"), 2600);
-}
-
-/* ============================ التخزين المحلي ============================ */
-function loadHist(){ try{ return JSON.parse(localStorage.getItem(HIST_KEY)) || {XAU:{}, XAG:{}, BTC:{}}; }catch(e){ return {XAU:{}, XAG:{}, BTC:{}}; } }
-function saveHist(h){ localStorage.setItem(HIST_KEY, JSON.stringify(h)); }
-function appendTodaySnapshot(prices){
-  const h = loadHist();
-  const k = todayKey();
-  for(const id of Object.keys(prices)){
-    if(!h[id]) h[id] = {};
-    h[id][k] = prices[id]; // بالدينار لكل وحدة (أونصة/عملة)
-  }
-  // الاحتفاظ بآخر 400 يوم فقط
-  for(const id of Object.keys(h)){
-    const keys = Object.keys(h[id]).sort();
-    if(keys.length > 400){ for(const kk of keys.slice(0, keys.length-400)) delete h[id][kk]; }
-  }
-  saveHist(h);
-}
-function historyArray(assetId){
-  const h = loadHist();
-  const map = h[assetId] || {};
-  return Object.keys(map).sort().map(k => ({ date:k, price:map[k] }));
-}
-function loadCompare(){ try{ return JSON.parse(localStorage.getItem(COMPARE_KEY)) || {}; }catch(e){ return {}; } }
-function saveCompare(d){ localStorage.setItem(COMPARE_KEY, JSON.stringify(d)); }
-
-/* ============================ جلب الأسعار اللحظية ============================ */
-async function fetchOne(symbol){
-  const res = await fetch(PRICE_API + symbol, { cache:"no-store" });
-  if(!res.ok) throw new Error("bad status");
-  const data = await res.json();
-  const price = data.price ?? data.rate ?? data.value ?? data.ask ?? data.bid ?? null;
-  const num = parseFloat(price);
-  if(isNaN(num)) throw new Error("no price field");
-  return num;
-}
-
-async function refreshLive(showToast){
-  const btn = document.getElementById("refreshBtn");
-  btn.classList.add("spin");
-  try{
-    const [xau, xag, btc] = await Promise.allSettled([fetchOne("XAU"), fetchOne("XAG"), fetchOne("BTC")]);
-    const got = {};
-    if(xau.status==="fulfilled") got.XAU = xau.value;
-    if(xag.status==="fulfilled") got.XAG = xag.value;
-    if(btc.status==="fulfilled") got.BTC = btc.value;
-
-    if(Object.keys(got).length===0){
-      toast("تعذّر الاتصال بمصدر الأسعار");
-    } else {
-      liveUSD = { ...liveUSD, ...got };
-      localStorage.setItem("jm_lastlive_v1", JSON.stringify(liveUSD));
-      const jodSnapshot = {};
-      for(const id of Object.keys(got)) jodSnapshot[id] = got[id] * fx;
-      appendTodaySnapshot(jodSnapshot);
-      document.getElementById("lastUpdateLbl").textContent = "آخر تحديث: " + new Date().toLocaleTimeString("ar-JO",{hour:"2-digit",minute:"2-digit"});
-      if(showToast) toast("تم تحديث الأسعار");
-    }
-  }catch(e){
-    toast("حدث خطأ غير متوقع");
-  }
-  btn.classList.remove("spin");
-  renderAll();
-}
-
-/* ============================ تاريخ البتكوين الحقيقي (محاولة، بدون اعتماد) ============================ */
-async function tryBackfillBitcoinHistory(){
-  const lastTs = parseInt(localStorage.getItem(BTC_HIST_TS_KEY)) || 0;
-  if(Date.now() - lastTs < 12*60*60*1000) return; // مرة كل 12 ساعة كحد أقصى
-  try{
-    const res = await fetch(COINGECKO_HIST, { cache:"no-store" });
-    if(!res.ok) throw new Error("coingecko failed");
-    const json = await res.json();
-    const h = loadHist();
-    if(!h.BTC) h.BTC = {};
-    for(const [ts, usd] of (json.prices||[])){
-      const d = new Date(ts);
-      const k = todayKey(d);
-      if(h.BTC[k]==null) h.BTC[k] = usd * fx; // لا نستبدل قيمة اليوم الحقيقية المُحدّثة فعليًا
-    }
-    saveHist(h);
-    localStorage.setItem(BTC_HIST_TS_KEY, String(Date.now()));
-    renderAll();
-  }catch(e){
-    // لا بأس، يبقى التاريخ يُبنى محليًا تدريجيًا بدون أي بيانات مزيّفة
-  }
-}
-
-/* ============================ الإحصاءات ============================ */
-function sliceDays(arr, days){ return arr.slice(Math.max(0, arr.length-days)); }
-function calcStats(arr, days){
-  const s = sliceDays(arr, days);
-  if(s.length < 2) return null;
-  const prices = s.map(p=>p.price);
-  return { high:Math.max(...prices), low:Math.min(...prices), avg: prices.reduce((a,b)=>a+b,0)/prices.length, count:s.length };
-}
-function currentAndYesterday(assetId){
-  const usd = liveUSD[assetId];
-  const current = usd!=null ? usd*fx : null;
-  const arr = historyArray(assetId);
-  const k = todayKey();
-  const prevEntries = arr.filter(p=>p.date!==k);
-  const yesterday = prevEntries.length ? prevEntries[prevEntries.length-1].price : null;
-  return { current, yesterday };
-}
-
-/* ============================ الرسم البياني ============================ */
-function drawAreaChart(canvas, points, accentColor){
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h);
-  const empty = document.getElementById("chartEmpty");
-  if(!points || points.length < 2){ empty.style.display="flex"; canvas.style.opacity=0.15; return; }
-  empty.style.display="none"; canvas.style.opacity=1;
-
-  const pad = 46;
-  const prices = points.map(p=>p.price);
-  const min = Math.min(...prices), max = Math.max(...prices);
-  const range = (max-min) || 1;
-  const scaleX = (w-pad*2)/((points.length-1) || 1);
-  const scaleY = (h-pad*2)/range;
-  const X = i => pad + i*scaleX;
-  const Y = v => h-pad - (v-min)*scaleY;
-
-  // خطوط الشبكة
-  ctx.strokeStyle = "rgba(255,255,255,.08)";
-  ctx.lineWidth = 1;
-  for(let i=0;i<=3;i++){ const y = pad + i*(h-pad*2)/3; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(w-pad,y); ctx.stroke(); }
-
-  // تعبئة متدرجة تحت الخط
-  const grad = ctx.createLinearGradient(0,pad,0,h-pad);
-  grad.addColorStop(0, accentColor + "55");
-  grad.addColorStop(1, accentColor + "00");
-  ctx.beginPath();
-  points.forEach((p,i)=>{ const x=X(i), y=Y(p.price); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
-  ctx.lineTo(X(points.length-1), h-pad);
-  ctx.lineTo(X(0), h-pad);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // الخط نفسه
-  ctx.beginPath();
-  points.forEach((p,i)=>{ const x=X(i), y=Y(p.price); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = accentColor;
-  ctx.lineJoin = "round";
-  ctx.stroke();
-
-  // تسميات أعلى/أدنى
-  ctx.fillStyle = "rgba(255,255,255,.55)";
-  ctx.font = "600 13px Cairo, system-ui";
-  ctx.textAlign = "left";
-  ctx.fillText(fmt(max, max>1000?0:2), 6, pad-6);
-  ctx.fillText(fmt(min, min>1000?0:2), 6, h-pad+18);
-}
-
-/* ============================ العرض ============================ */
-function accentVar(assetId){ return { XAU:"#E3B23C", XAG:"#C9D3DE", BTC:"#F7931A" }[assetId]; }
-
-function renderTiles(){
-  document.getElementById("tilesHost").innerHTML = ASSETS.map(a=>{
-    const { current, yesterday } = currentAndYesterday(a.id);
-    let deltaHtml = `<span class="flat">—</span>`;
-    if(current!=null && yesterday!=null){
-      const d = current-yesterday, p = yesterday? d/yesterday*100 : 0;
-      const cls = d>0.0001?"up":(d<-0.0001?"down":"flat");
-      deltaHtml = `<span class="${cls}">${d>=0?"▲":"▼"} ${pctStr(p)}</span>`;
-    }
-    return `<div class="tile ${a.cls} ${selectedAsset===a.id?'selected':''}" data-select="${a.id}">
-      <div class="tname">${a.name}</div>
-      <div class="tprice">${current!=null?fmt(current,a.decimals):'<span class="skel" style="display:inline-block;width:60px;height:16px"></span>'}</div>
-      <div class="tdelta">${deltaHtml}</div>
-    </div>`;
-  }).join("");
-  document.querySelectorAll("[data-select]").forEach(el=>{
-    el.onclick = ()=>{ selectedAsset = el.dataset.select; renderAll(); document.getElementById("detailTitle").scrollIntoView({behavior:"smooth", block:"center"}); };
-  });
-}
-
-function renderSeg(){
-  document.getElementById("assetSeg").innerHTML = ASSETS.map(a=>
-    `<button class="${selectedAsset===a.id?'active':''}" data-seg="${a.id}">${a.name}</button>`
-  ).join("");
-  document.querySelectorAll("[data-seg]").forEach(b=>{ b.onclick=()=>{ selectedAsset=b.dataset.seg; renderAll(); }; });
-}
-
-function renderDetail(){
-  const asset = ASSETS.find(a=>a.id===selectedAsset);
-  document.getElementById("detailTitle").textContent = `${asset.name} (${asset.unit})`;
-  const accent = accentVar(asset.id);
-  const arr = historyArray(asset.id);
-  const { current, yesterday } = currentAndYesterday(asset.id);
-
-  // المؤشرات
-  const week = calcStats(arr,7), month = calcStats(arr,30), year = calcStats(arr,365);
-  function diffBlock(curr, ref){
-    if(curr==null||ref==null) return `<span class="flat">—</span>`;
-    const d = curr-ref, p = ref? d/ref*100 : 0;
-    const cls = d>0.0001?"up":(d<-0.0001?"down":"flat");
-    return `<span class="${cls}">${d>=0?"+":""}${fmt(d,asset.decimals)} (${pctStr(p)})</span>`;
-  }
-  const distHigh = (current!=null && year) ? ((current-year.high)/year.high*100) : null;
-  const distLow  = (current!=null && year) ? ((current-year.low)/year.low*100) : null;
-  let indicator = "بيانات غير كافية بعد";
-  if(distHigh!=null && distLow!=null){
-    indicator = Math.abs(distHigh)<5 ? "قريب من القمة" : (distLow<8 ? "قريب من القاع" : "منطقة وسطية");
-  }
-
-  document.getElementById("insightsHost").innerHTML = `
-    <div class="insight"><div class="lbl">مقارنة بالأمس</div><div class="val">${diffBlock(current,yesterday)}</div></div>
-    <div class="insight"><div class="lbl">متوسط 7 أيام</div><div class="val">${week?fmt(week.avg,asset.decimals):"قريبًا"}</div><div class="extra">${week?`أساس ${week.count} يوم`:"يحتاج يومين على الأقل"}</div></div>
-    <div class="insight"><div class="lbl">متوسط 30 يومًا</div><div class="val">${month?fmt(month.avg,asset.decimals):"قريبًا"}</div><div class="extra">${month?`أساس ${month.count} يوم`:"يتراكم تدريجيًا"}</div></div>
-    <div class="insight"><div class="lbl">المؤشر العام</div><div class="val" style="font-size:13px">${indicator}</div></div>
-  `;
-
-  document.getElementById("rangeTabs").innerHTML = RANGES.map(r=>
-    `<button class="rtab ${chartRange===r.key?'active':''}" data-range="${r.key}" style="--accent:${accent}">${r.label}</button>`
-  ).join("");
-  document.querySelectorAll("[data-range]").forEach(b=>{
-    b.style.setProperty("--accent", accent);
-    if(chartRange===b.dataset.range) b.classList.add("active");
-    b.onclick = ()=>{ chartRange = b.dataset.range; renderDetail(); };
-  });
-
-  const rangeDef = RANGES.find(r=>r.key===chartRange);
-  drawAreaChart(document.getElementById("chart"), sliceDays(arr, rangeDef.days), accent);
-  document.getElementById("chartEmpty").textContent = `لا توجد بيانات كافية بعد لعرض الرسم البياني لفترة "${rangeDef.label}" — استمر باستخدام التطبيق يوميًا وسيتكوّن تلقائيًا`;
-
-  document.getElementById("statsBody").innerHTML = RANGES.map(r=>{
-    const st = calcStats(arr, r.days);
-    if(!st) return `<tr><td class="lbl-cell">${r.label}</td><td colspan="4" style="color:var(--muted2)">بيانات غير كافية (${arr.length} يوم متوفر)</td></tr>`;
-    return `<tr>
-      <td class="lbl-cell">${r.label}</td>
-      <td class="mono">${fmt(st.high,asset.decimals)}</td>
-      <td>${diffBlock(current, st.high)}</td>
-      <td class="mono">${fmt(st.low,asset.decimals)}</td>
-      <td>${diffBlock(current, st.low)}</td>
-    </tr>`;
-  }).join("");
-
-  const note = document.getElementById("historyNote");
-  if(asset.id==="BTC"){
-    note.innerHTML = `📊 بيانات البتكوين التاريخية الكاملة (حتى سنة) تُجلب فعليًا من CoinGecko عند الإمكان (${arr.length} يوم محفوظ حاليًا).`;
-  } else {
-    note.innerHTML = `📊 لا تتوفر خدمة مجانية موثوقة بدون مفتاح API لتاريخ ${asset.name} الكامل، فيُبنى التاريخ يومًا بيوم من استخدامك الفعلي (${arr.length} يوم محفوظ حاليًا).`;
-  }
-}
-
-function renderCompareSelectors(){
-  const sel = document.getElementById("cmpAsset");
-  if(sel.options.length===0){
-    sel.innerHTML = ASSETS.map(a=>`<option value="${a.id}">${a.name} (د.أ/${a.unit})</option>`).join("");
-  }
-}
-function renderCompareList(){
-  const data = loadCompare();
-  const host = document.getElementById("cmpList");
-  const rows = [];
-  for(const asset of ASSETS){
-    const list = data[asset.id] || [];
-    const { current } = currentAndYesterday(asset.id);
-    list.forEach((c, idx)=>{
-      let diffHtml = "—";
-      if(current!=null){
-        const d = c.price - current, p = current? d/current*100 : 0;
-        const cls = d>0.0001 ? "down" : (d<-0.0001 ? "up" : "flat"); // سعرك أعلى من السوق = أحمر (أغلى)
-        diffHtml = `<span class="${cls}">${d>=0?"+":""}${fmt(d,asset.decimals)} (${pctStr(p)})</span>`;
-      }
-      rows.push(`<div class="cmp-row">
-        <div class="meta"><b>${asset.name} — ${fmt(c.price,asset.decimals)} د.أ</b><small>${escapeHtml(c.label||"بدون تسمية")}</small></div>
-        <div class="diff">${diffHtml}</div>
-        <button class="del" data-delcmp="${asset.id}|${idx}">✕</button>
-      </div>`);
-    });
-  }
-  host.innerHTML = rows.length ? rows.join("") : `<div class="empty-note">لم تُضف أي سعر للمقارنة بعد</div>`;
-  document.querySelectorAll("[data-delcmp]").forEach(b=>{
-    b.onclick = ()=>{
-      const [id, idx] = b.dataset.delcmp.split("|");
-      const d = loadCompare();
-      d[id].splice(parseInt(idx),1);
-      saveCompare(d);
-      renderCompareList();
-    };
-  });
-}
-
-function renderAll(){
-  renderTiles();
-  renderSeg();
-  renderDetail();
-  renderCompareSelectors();
-  renderCompareList();
-}
-
-/* ============================ الأحداث ============================ */
-document.getElementById("refreshBtn").onclick = ()=> refreshLive(true);
-
-const fxInput = document.getElementById("fxInput");
-fxInput.value = fx;
-fxInput.onchange = ()=>{
-  const v = parseFloat(fxInput.value);
-  if(!isNaN(v) && v>0){ fx = v; localStorage.setItem(FX_KEY, v); renderAll(); }
-};
-
-document.getElementById("cmpSave").onclick = ()=>{
-  const asset = document.getElementById("cmpAsset").value;
-  const price = parseFloat(document.getElementById("cmpPrice").value);
-  const label = document.getElementById("cmpLabel").value.trim();
-  if(isNaN(price) || price<=0){ toast("أدخل سعرًا صحيحًا"); return; }
-  const data = loadCompare();
-  if(!data[asset]) data[asset]=[];
-  data[asset].push({ price, label, addedAt: Date.now() });
-  saveCompare(data);
-  document.getElementById("cmpPrice").value = "";
-  document.getElementById("cmpLabel").value = "";
-  toast("تم حفظ المقارنة");
-  renderCompareList();
-};
-
-function applyTheme(t){
-  document.body.dataset.theme = t;
-  localStorage.setItem(THEME_KEY, t);
-  document.getElementById("themeIcon").innerHTML = t==="dark"
-    ? `<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
-    : `<circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="2"/><path d="M12 3v2.2M12 18.8V21M4.2 12H2M22 12h-2.2M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
-}
-document.getElementById("themeBtn").onclick = ()=> applyTheme(document.body.dataset.theme==="dark" ? "light" : "dark");
-
-/* ============================ الإقلاع ============================ */
-(function init(){
-  applyTheme(localStorage.getItem(THEME_KEY) || "dark");
-  try{ liveUSD = JSON.parse(localStorage.getItem("jm_lastlive_v1")) || {}; }catch(e){ liveUSD = {}; }
-  renderAll();
-  refreshLive(false);
-  tryBackfillBitcoinHistory();
-  setInterval(()=> refreshLive(false), 5*60*1000);
-})();
-
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
+const METALS={gold:{name:'الذهب',sub:'أونصة XAU',icon:'◉',symbol:'XAU',stooq:'xauusd',accent:'#ffd05a',dp:2},silver:{name:'الفضة',sub:'أونصة XAG',icon:'◌',symbol:'XAG',stooq:'xagusd',accent:'#bfe7ff',dp:2},bitcoin:{name:'بيتكوين',sub:'BTC',icon:'₿',symbol:'BTC',accent:'#ff9c4a',dp:0}};
+const FX=[{code:'JOD',name:'الدينار الأردني',flag:'🇯🇴'},{code:'SAR',name:'الريال السعودي',flag:'🇸🇦'},{code:'AED',name:'الدرهم الإماراتي',flag:'🇦🇪'},{code:'KWD',name:'الدينار الكويتي',flag:'🇰🇼'},{code:'QAR',name:'الريال القطري',flag:'🇶🇦'},{code:'BHD',name:'الدينار البحريني',flag:'🇧🇭'},{code:'OMR',name:'الريال العُماني',flag:'🇴🇲'},{code:'EUR',name:'اليورو',flag:'🇪🇺'},{code:'GBP',name:'الجنيه الإسترليني',flag:'🇬🇧'}];
+const PERIODS=[{label:'اليوم',days:0},{label:'أمس',days:1},{label:'قبل أسبوع',days:7},{label:'قبل شهر',days:30},{label:'قبل 3 أشهر',days:90},{label:'قبل 6 أشهر',days:180},{label:'قبل سنة',days:365}];
+const RANGES=[{label:'أسبوع',days:7},{label:'شهر',days:30},{label:'3 أشهر',days:90},{label:'6 أشهر',days:180},{label:'سنة',days:365}];
+let data={assets:{},fx:{},updatedAt:null};let selected={type:'asset',key:'gold'};let chartDays=30;const $=id=>document.getElementById(id);
+const fmt=(n,dp=2)=>Number.isFinite(+n)?Number(n).toLocaleString('en-US',{minimumFractionDigits:dp,maximumFractionDigits:dp}):'—';
+const iso=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`};
+const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>e.classList.remove('show'),2200)};
+function nearest(points,target){if(!points?.length)return null;const t=new Date(target).getTime();let best=points[0],bd=Infinity;for(const p of points){const d=Math.abs(new Date(p.date).getTime()-t);if(d<bd){bd=d;best=p}}return best}
+function change(curr,ref){if(!Number.isFinite(curr)||!Number.isFinite(ref)||!ref)return {d:null,p:null,cls:'flat'};const d=curr-ref,p=d/ref*100;return{d,p,cls:d>0?'up':d<0?'down':'flat'}}
+async function fetchJson(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(r.status);return r.json()}
+async function fetchGold(symbol){const j=await fetchJson('https://api.gold-api.com/price/'+symbol);return Number(j.price??j.rate??j.value)}
+async function fetchStooq(sym){const r=await fetch(`https://stooq.com/q/d/l/?s=${sym}&i=d`,{cache:'no-store'});if(!r.ok)throw new Error('stooq');const txt=await r.text();return txt.trim().split(/\r?\n/).slice(1).map(x=>{const c=x.split(',');return{date:c[0],price:Number(c[4])}}).filter(x=>x.date&&Number.isFinite(x.price)).slice(-370)}
+async function fetchBitcoin(){const j=await fetchJson('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=365&interval=daily');const m=new Map();for(const x of j.prices||[]){m.set(new Date(x[0]).toISOString().slice(0,10),{date:new Date(x[0]).toISOString().slice(0,10),price:Number(x[1])})}return [...m.values()].slice(-366)}
+function parseFxRows(rows){const out={};if(Array.isArray(rows)){for(const r of rows){const code=r.quote||r.symbol||r.currency;const rate=Number(r.rate);if(code&&Number.isFinite(rate)){out[code]=out[code]||[];out[code].push({date:r.date||iso(new Date()),price:rate})}}}else if(rows?.rates){for(const [date,obj] of Object.entries(rows.rates)){for(const [code,rate] of Object.entries(obj)){out[code]=out[code]||[];out[code].push({date,price:Number(rate)})}}}for(const a of Object.values(out))a.sort((x,y)=>x.date.localeCompare(y.date));return out}
+async function fetchFx(){const from=new Date();from.setDate(from.getDate()-370);const quotes=FX.map(x=>x.code).join(',');let j;try{j=await fetchJson(`https://api.frankfurter.dev/v2/rates?base=USD&quotes=${quotes}&from=${iso(from)}&to=${iso(new Date())}`)}catch(e){j=await fetchJson(`https://api.frankfurter.dev/v1/${iso(from)}..?base=USD&symbols=${quotes}`)}return parseFxRows(j)}
+async function load(){try{$('marketStatus').textContent='● تحديث';const [xau,xag,goldHist,silverHist,btc,fx]=await Promise.all([fetchGold('XAU'),fetchGold('XAG'),fetchStooq('xauusd'),fetchStooq('xagusd'),fetchBitcoin(),fetchFx()]);if(goldHist.length)goldHist[goldHist.length-1]={date:iso(new Date()),price:xau};if(silverHist.length)silverHist[silverHist.length-1]={date:iso(new Date()),price:xag};data={assets:{gold:goldHist,silver:silverHist,bitcoin:btc},fx,updatedAt:new Date().toISOString()};localStorage.setItem('market_cache_v4',JSON.stringify(data));$('marketStatus').textContent='● مباشر';toast('تم تحديث الأسعار')}catch(e){console.warn(e);const c=localStorage.getItem('market_cache_v4');if(c){data=JSON.parse(c);$('marketStatus').textContent='● آخر نسخة محفوظة';toast('تعذر التحديث، تم عرض آخر نسخة')}else{$('marketStatus').textContent='● تعذر الاتصال';toast('تعذر جلب الأسعار')}}render()}
+function render(){if(!data.updatedAt)return;$('lastUpdate').textContent=new Date(data.updatedAt).toLocaleString('ar-JO',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});renderMarkets();renderFx();renderDetail()}
+function renderMarkets(){$('marketGrid').innerHTML=Object.entries(METALS).map(([k,a])=>{const pts=data.assets[k]||[],c=pts.at(-1)?.price,y=pts.at(-2)?.price,ch=change(c,y);if(k==='gold')$('heroPrice').textContent=`ذهب ${fmt(c,2)} $`;return `<div class="market ${selected.type==='asset'&&selected.key===k?'selected':''}" style="--accent:${a.accent}" data-asset="${k}"><span class="mi">${a.icon}</span><div class="mn">${a.name}</div><div class="mp">${fmt(c,a.dp)} $</div><div class="md ${ch.cls}">${ch.p==null?'—':`${ch.p>=0?'▲':'▼'} ${fmt(Math.abs(ch.p),2)}%`}</div></div>`}).join('');document.querySelectorAll('[data-asset]').forEach(e=>e.onclick=()=>{selected={type:'asset',key:e.dataset.asset};render();$('detailName').scrollIntoView({behavior:'smooth',block:'center'})})}
+function renderFx(){$('currencyScroller').innerHTML=FX.map(f=>{const p=data.fx[f.code]||[],c=p.at(-1)?.price;return `<div class="fx ${selected.type==='fx'&&selected.key===f.code?'selected':''}" data-fx="${f.code}"><div class="fxTop"><span class="code">${f.code}</span><span class="flag">${f.flag}</span></div><div class="fxName">${f.name}</div><div class="fxVal">${fmt(c,c&&c<1?4:3)}</div><div class="fxHint">${f.code} لكل 1 USD</div></div>`}).join('');document.querySelectorAll('[data-fx]').forEach(e=>e.onclick=()=>{selected={type:'fx',key:e.dataset.fx};render();$('detailName').scrollIntoView({behavior:'smooth',block:'center'})})}
+function selectedMeta(){if(selected.type==='asset'){const m=METALS[selected.key];return{name:m.name,sub:m.sub,points:data.assets[selected.key]||[],dp:m.dp,unit:'$',accent:m.accent}}const m=FX.find(x=>x.code===selected.key);const p=data.fx[selected.key]||[];return{name:m?.name||selected.key,sub:`${selected.key} لكل 1 دولار أمريكي`,points:p,dp:(p.at(-1)?.price||1)<1?4:3,unit:'',accent:'#46d9ff'}}
+function renderDetail(){const m=selectedMeta(),pts=m.points,c=pts.at(-1)?.price;$('detailName').textContent=m.name;$('detailSub').textContent=m.sub;$('detailBadge').textContent=`${pts.length} نقطة فعلية`;const w=nearest(pts,new Date(Date.now()-7*864e5)),mo=nearest(pts,new Date(Date.now()-30*864e5)),yr=nearest(pts,new Date(Date.now()-365*864e5));const vals=pts.slice(-365).map(x=>x.price),hi=vals.length?Math.max(...vals):null,lo=vals.length?Math.min(...vals):null;$('metrics').innerHTML=`<div class="metric"><span>السعر الحالي</span><b>${fmt(c,m.dp)} ${m.unit}</b></div><div class="metric"><span>منذ أسبوع</span><b class="${change(c,w?.price).cls}">${change(c,w?.price).p==null?'—':(change(c,w.price).p>=0?'+':'')+fmt(change(c,w.price).p,2)+'%'}</b></div><div class="metric"><span>أعلى سنة</span><b>${fmt(hi,m.dp)}</b></div><div class="metric"><span>أدنى سنة</span><b>${fmt(lo,m.dp)}</b></div>`;$('rangeTabs').innerHTML=RANGES.map(r=>`<button class="${chartDays===r.days?'active':''}" data-range="${r.days}">${r.label}</button>`).join('');document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{chartDays=Number(b.dataset.range);renderDetail()});drawChart(pts.slice(-chartDays),m.accent);renderAnalysis(m);$('sourceNote').textContent=selected.type==='fx'?'المصدر: Frankfurter — بيانات أسعار صرف حالية وتاريخية من مزودي بنوك مركزية ومصادر رسمية.':'السعر اللحظي: Gold API للذهب والفضة / CoinGecko للبيتكوين. التاريخ: Stooq للمعادن وCoinGecko للبيتكوين.'}
+function renderAnalysis(m){const pts=m.points,c=pts.at(-1)?.price;$('analysisRows').innerHTML=PERIODS.map((r,i)=>{const target=new Date();target.setDate(target.getDate()-r.days);const p=r.days===0?pts.at(-1):nearest(pts,target);if(!p)return `<tr><td class="period">${r.label}</td><td colspan="4">—</td></tr>`;const ch=change(c,p.price);return `<tr class="${i===0?'todayRow':''}"><td class="period">${r.label}</td><td><b>${fmt(p.price,m.dp)} ${m.unit}</b></td><td class="${ch.cls}">${i===0?'—':`${ch.d>=0?'+':''}${fmt(ch.d,m.dp)} ${m.unit}`}</td><td class="${ch.cls}">${i===0?'—':`${ch.p>=0?'+':''}${fmt(ch.p,2)}%`}</td><td>${p.date}</td></tr>`}).join('')}
+function drawChart(pts,color){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);if(pts.length<2){ctx.fillStyle='#999';ctx.font='28px sans-serif';ctx.textAlign='center';ctx.fillText('بيانات غير كافية',w/2,h/2);return}const pad=38,v=pts.map(x=>x.price),mn=Math.min(...v),mx=Math.max(...v),rg=mx-mn||1,X=i=>pad+i*(w-pad*2)/(pts.length-1),Y=n=>h-pad-(n-mn)*(h-pad*2)/rg;ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=pad+i*(h-pad*2)/3;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke()}const g=ctx.createLinearGradient(0,pad,0,h-pad);g.addColorStop(0,color+'55');g.addColorStop(1,color+'00');ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(X(i),Y(p.price)):ctx.moveTo(X(i),Y(p.price)));ctx.lineTo(X(pts.length-1),h-pad);ctx.lineTo(X(0),h-pad);ctx.closePath();ctx.fillStyle=g;ctx.fill();ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(X(i),Y(p.price)):ctx.moveTo(X(i),Y(p.price)));ctx.strokeStyle=color;ctx.lineWidth=4;ctx.lineJoin='round';ctx.stroke()}
+$('refreshBtn').onclick=load;$('themeBtn').onclick=()=>{document.body.dataset.theme=document.body.dataset.theme==='dark'?'light':'dark';localStorage.setItem('theme_v4',document.body.dataset.theme)};document.body.dataset.theme=localStorage.getItem('theme_v4')||'dark';const cached=localStorage.getItem('market_cache_v4');if(cached){try{data=JSON.parse(cached);render()}catch(e){}}load();setInterval(load,5*60*1000);if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
-</body>
-</html>
+</body></html>
