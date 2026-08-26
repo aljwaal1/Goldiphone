@@ -2,10 +2,8 @@ package com.explapp.marketpulse
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlarmManager
-import android.app.PendingIntent
+import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -26,7 +24,9 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
@@ -38,7 +38,8 @@ class MainActivity : Activity() {
         IntroPage("✦","كل السوق في شاشة واحدة","تابع الذهب والعملات بثقة","ذهب وفضة وبيتكوين وعملات عربية وعالمية في واجهة واحدة سريعة وواضحة.",Color.rgb(255,207,85),Color.rgb(255,139,74)),
         IntroPage("↕","عملة التطبيق","اختر العملة التي تناسبك","الدولار افتراضيًا، ويمكن تغيير العملة من قائمة منسدلة واضحة دون استهلاك مساحة الشاشة.",Color.rgb(67,216,255),Color.rgb(88,126,255)),
         IntroPage("⌁","تحليل زمني حقيقي","اعرف أين كان السعر","التغير في بطاقات الأصول يقارن بسعر أمس، والتحليل التاريخي لا يعرض نقطة غير متوفرة كأنها حقيقية.",Color.rgb(155,124,255),Color.rgb(218,92,255)),
-        IntroPage("🔔","إشعارات يومية","اختر الوقت الذي يناسبك","فعّل إشعارًا يوميًا اختياريًا بآخر ملخص محفوظ للأسواق وبعملة التطبيق التي اخترتها.",Color.rgb(75,229,167),Color.rgb(67,216,255)),
+        IntroPage("🔕","أنت تتحكم بالإشعارات","لا إزعاج دون اختيارك","لن يرسل التطبيق أي إشعار تلقائيًا. أنت تحدد تاريخ البدء والوقت والأيام التي تريد وصول الإشعار فيها.",Color.rgb(75,229,167),Color.rgb(67,216,255)),
+        IntroPage("🎯","إشعار حسب اهتمامك","اختر الأسعار التي تريدها","يمكنك اختيار كل الأسعار، أو الذهب والفضة والبيتكوين، أو عملات محددة فقط. الإشعار يعرض ما اخترته أنت.",Color.rgb(255,196,80),Color.rgb(255,126,90)),
         IntroPage("✉","الدعم والتواصل","المطور قريب منك","يمكنك مراسلة المطور في أي وقت من أيقونة المراسلة في الشريط السفلي.",Color.rgb(255,157,76),Color.rgb(155,124,255))
     )
 
@@ -56,156 +57,139 @@ class MainActivity : Activity() {
     private fun showOnboarding(i:Int){
         val p=introPages[i]
         val root=FrameLayout(this).apply{setBackgroundColor(Color.rgb(8,9,19))}
-        val content=LinearLayout(this).apply{
-            orientation=LinearLayout.VERTICAL
-            gravity=Gravity.CENTER_HORIZONTAL
-            setPadding(dp(26),dp(28),dp(26),dp(28))
-        }
+        val content=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;gravity=Gravity.CENTER_HORIZONTAL;setPadding(dp(26),dp(28),dp(26),dp(28))}
         root.addView(content,FrameLayout.LayoutParams(-1,-1))
         val top=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL;gravity=Gravity.CENTER_VERTICAL}
-        top.addView(TextView(this).apply{
-            text="M+  مؤشر الأسواق";setTextColor(Color.WHITE);textSize=20f;setTypeface(typeface,Typeface.BOLD)
-        },LinearLayout.LayoutParams(0,dp(48),1f))
-        top.addView(TextView(this).apply{
-            text="تخطي";setTextColor(Color.rgb(170,176,199));gravity=Gravity.CENTER;setOnClickListener{finishOnboarding()}
-        },LinearLayout.LayoutParams(dp(64),dp(48)))
+        top.addView(TextView(this).apply{text="M+  مؤشر الأسواق";setTextColor(Color.WHITE);textSize=20f;setTypeface(typeface,Typeface.BOLD)},LinearLayout.LayoutParams(0,dp(48),1f))
+        top.addView(TextView(this).apply{text="تخطي";setTextColor(Color.rgb(170,176,199));gravity=Gravity.CENTER;setOnClickListener{finishOnboarding()}},LinearLayout.LayoutParams(dp(64),dp(48)))
         content.addView(top,LinearLayout.LayoutParams(-1,-2))
         content.addView(View(this),LinearLayout.LayoutParams(1,0,.45f))
-        content.addView(TextView(this).apply{
-            text=p.icon;gravity=Gravity.CENTER;textSize=52f;setTextColor(Color.rgb(18,16,28));background=gradient(p.a,p.b,44f);elevation=dp(8).toFloat()
-        },LinearLayout.LayoutParams(dp(116),dp(116)).apply{bottomMargin=dp(26)})
+        content.addView(TextView(this).apply{text=p.icon;gravity=Gravity.CENTER;textSize=52f;setTextColor(Color.rgb(18,16,28));background=gradient(p.a,p.b,44f);elevation=dp(8).toFloat()},LinearLayout.LayoutParams(dp(116),dp(116)).apply{bottomMargin=dp(26)})
         content.addView(TextView(this).apply{text=p.eyebrow;setTextColor(p.a);textSize=13f;gravity=Gravity.CENTER;setTypeface(typeface,Typeface.BOLD)})
         content.addView(TextView(this).apply{text=p.title;setTextColor(Color.WHITE);textSize=29f;gravity=Gravity.CENTER;setTypeface(typeface,Typeface.BOLD);setPadding(0,dp(10),0,dp(12))})
         content.addView(TextView(this).apply{text=p.description;setTextColor(Color.rgb(180,185,207));textSize=16f;gravity=Gravity.CENTER;setLineSpacing(dp(4).toFloat(),1f)},LinearLayout.LayoutParams(-1,-2))
         content.addView(View(this),LinearLayout.LayoutParams(1,0,.55f))
         content.addView(TextView(this).apply{text=introPages.indices.joinToString("  "){if(it==i)"●" else "○"};setTextColor(p.a);textSize=16f;gravity=Gravity.CENTER;setPadding(0,0,0,dp(16))})
-        if(i==introPages.lastIndex) content.addView(Button(this).apply{
-            text="✉  مراسلة المطور";isAllCaps=false;setTextColor(Color.WHITE);background=gradient(Color.rgb(42,46,72),Color.rgb(25,28,48));setOnClickListener{contactDeveloper()}
-        },LinearLayout.LayoutParams(-1,dp(52)).apply{bottomMargin=dp(9)})
-        content.addView(Button(this).apply{
-            text=if(i==introPages.lastIndex)"ابدأ الآن" else "التالي";isAllCaps=false;textSize=17f;setTypeface(typeface,Typeface.BOLD);setTextColor(Color.rgb(18,16,28));background=gradient(p.a,p.b);setOnClickListener{if(i==introPages.lastIndex)finishOnboarding() else showOnboarding(i+1)}
-        },LinearLayout.LayoutParams(-1,dp(56)))
+        if(i==introPages.lastIndex) content.addView(Button(this).apply{text="✉  مراسلة المطور";isAllCaps=false;setTextColor(Color.WHITE);background=gradient(Color.rgb(42,46,72),Color.rgb(25,28,48));setOnClickListener{contactDeveloper()}},LinearLayout.LayoutParams(-1,dp(52)).apply{bottomMargin=dp(9)})
+        content.addView(Button(this).apply{text=if(i==introPages.lastIndex)"ابدأ الآن" else "التالي";isAllCaps=false;textSize=17f;setTypeface(typeface,Typeface.BOLD);setTextColor(Color.rgb(18,16,28));background=gradient(p.a,p.b);setOnClickListener{if(i==introPages.lastIndex)finishOnboarding() else showOnboarding(i+1)}},LinearLayout.LayoutParams(-1,dp(56)))
         setContentView(root)
     }
 
     private fun finishOnboarding(){prefs.edit().putBoolean("onboarding_done",true).apply();showWebApp(null)}
 
-    private fun contactDeveloper(){
-        runCatching{
-            startActivity(Intent(Intent.ACTION_SENDTO,Uri.parse("mailto:fastunllocked2017@gmail.com?subject="+Uri.encode("مراسلة مطور مؤشر الأسواق"))))
-        }
-    }
+    private fun contactDeveloper(){runCatching{startActivity(Intent(Intent.ACTION_SENDTO,Uri.parse("mailto:fastunllocked2017@gmail.com?subject="+Uri.encode("مراسلة مطور مؤشر الأسواق"))))}}
 
     private fun showWebApp(saved:Bundle?){
         val root=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setBackgroundColor(Color.rgb(8,9,19))}
         webView=WebView(this).apply{
-            setBackgroundColor(Color.rgb(8,9,19))
-            overScrollMode=View.OVER_SCROLL_NEVER
-            isVerticalScrollBarEnabled=false
-            isHorizontalScrollBarEnabled=false
-            setLayerType(View.LAYER_TYPE_HARDWARE,null)
-            addJavascriptInterface(AppBridge(),"MarketPulseAndroid")
-            webChromeClient=WebChromeClient()
+            setBackgroundColor(Color.rgb(8,9,19));overScrollMode=View.OVER_SCROLL_NEVER;isVerticalScrollBarEnabled=false;isHorizontalScrollBarEnabled=false
+            setLayerType(View.LAYER_TYPE_HARDWARE,null);addJavascriptInterface(AppBridge(),"MarketPulseAndroid");webChromeClient=WebChromeClient()
             webViewClient=object:WebViewClient(){override fun onPageFinished(v:WebView?,u:String?){injectUiFixes()}}
-            settings.apply{
-                javaScriptEnabled=true;domStorageEnabled=true;databaseEnabled=true;cacheMode=WebSettings.LOAD_NO_CACHE
-                builtInZoomControls=false;displayZoomControls=false;setSupportZoom(false);loadWithOverviewMode=true;useWideViewPort=false
-                allowFileAccess=false;allowContentAccess=false;mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                userAgentString="$userAgentString MarketPulseAndroid/2.1"
-            }
+            settings.apply{javaScriptEnabled=true;domStorageEnabled=true;databaseEnabled=true;cacheMode=WebSettings.LOAD_NO_CACHE;builtInZoomControls=false;displayZoomControls=false;setSupportZoom(false);loadWithOverviewMode=true;useWideViewPort=false;allowFileAccess=false;allowContentAccess=false;mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW;userAgentString="$userAgentString MarketPulseAndroid/2.3"}
             clearCache(true)
         }
-        root.addView(webView,LinearLayout.LayoutParams(-1,0,1f))
-        bottomBar=createBottomBar()
-        root.addView(bottomBar,LinearLayout.LayoutParams(-1,dp(64)))
-        setContentView(root)
-        if(saved==null)webView.loadUrl("https://aljwaal1.github.io/Goldiphone/?app=android&v=21") else webView.restoreState(saved)
+        root.addView(webView,LinearLayout.LayoutParams(-1,0,1f));bottomBar=createBottomBar();root.addView(bottomBar,LinearLayout.LayoutParams(-1,dp(64)));setContentView(root)
+        if(saved==null)webView.loadUrl("https://aljwaal1.github.io/Goldiphone/?app=android&v=23") else webView.restoreState(saved)
     }
 
     private fun createBottomBar():LinearLayout{
-        val bar=LinearLayout(this).apply{
-            orientation=LinearLayout.HORIZONTAL
-            layoutDirection=View.LAYOUT_DIRECTION_LTR
-            gravity=Gravity.CENTER
-            setPadding(dp(6),dp(6),dp(6),dp(6))
-            setBackgroundColor(Color.rgb(10,12,24))
-        }
-        fun add(label:String,size:Float=11f,action:()->Unit){
-            bar.addView(Button(this).apply{
-                text=label;isAllCaps=false;textSize=size;setTextColor(Color.WHITE)
-                background=gradient(Color.rgb(26,30,50),Color.rgb(18,21,37),20f)
-                setOnClickListener{action()}
-            },LinearLayout.LayoutParams(0,dp(50),1f).apply{marginStart=dp(3);marginEnd=dp(3)})
-        }
-        // LTR container: this sequence yields right-to-left visual order:
-        // الرئيسية ← التحليل ← الإشعارات ← المراسلة
-        add("✉",23f){contactDeveloper()}
-        add("🔔\nالإشعارات"){showNotificationSettings()}
-        add("⌁\nالتحليل"){showChartsPage()}
-        add("⌂\nالرئيسية"){showMainPage()}
+        val bar=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL;layoutDirection=View.LAYOUT_DIRECTION_LTR;gravity=Gravity.CENTER;setPadding(dp(6),dp(6),dp(6),dp(6));setBackgroundColor(Color.rgb(10,12,24))}
+        fun add(label:String,size:Float=11f,action:()->Unit){bar.addView(Button(this).apply{text=label;isAllCaps=false;textSize=size;setTextColor(Color.WHITE);background=gradient(Color.rgb(26,30,50),Color.rgb(18,21,37),20f);setOnClickListener{action()}},LinearLayout.LayoutParams(0,dp(50),1f).apply{marginStart=dp(3);marginEnd=dp(3)})}
+        add("✉",23f){contactDeveloper()};add("🔔\nالإشعارات"){showNotificationSettings()};add("⌁\nالتحليل"){showChartsPage()};add("⌂\nالرئيسية"){showMainPage()}
         return bar
     }
 
-    private fun showMainPage(){
-        webView.evaluateJavascript("document.body.classList.remove('charts-page');window.scrollTo(0,0);",null)
-    }
-
-    private fun showChartsPage(){
-        webView.evaluateJavascript("document.body.classList.add('charts-page');var c=document.querySelector('.card');if(c)c.scrollIntoView({block:'start'});",null)
-    }
+    private fun showMainPage(){webView.evaluateJavascript("document.body.classList.remove('charts-page');window.scrollTo(0,0);",null)}
+    private fun showChartsPage(){webView.evaluateJavascript("document.body.classList.add('charts-page');var c=document.querySelector('.card');if(c)c.scrollIntoView({block:'start'});",null)}
 
     private fun showNotificationSettings(){
-        val enabled=prefs.getBoolean("daily_enabled",false)
-        if(enabled){
-            android.app.AlertDialog.Builder(this)
-                .setTitle("الإشعارات اليومية")
-                .setMessage("الإشعار اليومي مفعّل الساعة ${prefs.getString("daily_time","20:00")}. ماذا تريد؟")
-                .setPositiveButton("تغيير الوقت"){_,_->pickNotificationTime()}
-                .setNegativeButton("إيقاف"){_,_->cancelDailyNotification();Toast.makeText(this,"تم إيقاف الإشعارات اليومية",Toast.LENGTH_SHORT).show()}
-                .setNeutralButton("إلغاء",null).show()
-        }else pickNotificationTime()
+        if(!prefs.getBoolean("daily_enabled",false)){
+            android.app.AlertDialog.Builder(this).setTitle("إعداد الإشعارات")
+                .setMessage("لن يصلك أي إشعار قبل أن تختار تاريخ البدء والوقت والأيام والأسعار التي تريدها.")
+                .setPositiveButton("إعداد الإشعار"){_,_->pickStartDate(true)}.setNegativeButton("إلغاء",null).show()
+            return
+        }
+        val items=summaryItemsLabel()
+        val msg="مفعّل من ${prefs.getString("notify_start_date","—")} • الساعة ${prefs.getString("daily_time","—")}\nالأيام: ${selectedDaysLabel()}\nالمحتوى: $items"
+        val options=arrayOf("تغيير تاريخ البدء","تغيير الوقت","اختيار الأيام","اختيار محتوى الإشعار","إيقاف الإشعارات")
+        android.app.AlertDialog.Builder(this).setTitle("إعدادات الإشعارات").setMessage(msg).setItems(options){_,which->
+            when(which){0->pickStartDate(false);1->pickNotificationTime(false);2->pickNotificationDays(false);3->pickNotificationItems(false);4->{cancelDailyNotification();Toast.makeText(this,"تم إيقاف الإشعارات",Toast.LENGTH_SHORT).show()}}
+        }.setNegativeButton("إغلاق",null).show()
     }
 
-    private fun pickNotificationTime(){
-        val saved=prefs.getString("daily_time",null)?.split(":")
-        val h=saved?.getOrNull(0)?.toIntOrNull()?:20
-        val m=saved?.getOrNull(1)?.toIntOrNull()?:0
+    private fun pickStartDate(continueSetup:Boolean){
+        val cal=Calendar.getInstance()
+        val saved=prefs.getString("notify_start_date",null)
+        if(!saved.isNullOrBlank())runCatching{SimpleDateFormat("yyyy-MM-dd",Locale.US).parse(saved)?.let{cal.time=it}}
+        val dialog=DatePickerDialog(this,{_,y,m,d->
+            val value=String.format(Locale.US,"%04d-%02d-%02d",y,m+1,d)
+            prefs.edit().putString("notify_start_date",value).apply()
+            if(continueSetup)pickNotificationTime(true) else rescheduleIfEnabled()
+        },cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH))
+        dialog.datePicker.minDate=Calendar.getInstance().apply{set(Calendar.HOUR_OF_DAY,0);set(Calendar.MINUTE,0);set(Calendar.SECOND,0);set(Calendar.MILLISECOND,0)}.timeInMillis
+        dialog.show()
+    }
+
+    private fun pickNotificationTime(continueSetup:Boolean=false){
+        val saved=prefs.getString("daily_time",null)?.split(":");val h=saved?.getOrNull(0)?.toIntOrNull()?:20;val m=saved?.getOrNull(1)?.toIntOrNull()?:0
         TimePickerDialog(this,{_,hour,minute->
-            val time=String.format("%02d:%02d",hour,minute)
-            prefs.edit().putBoolean("daily_enabled",true).putString("daily_time",time).apply()
-            scheduleDailyNotification(hour,minute)
-            requestNotificationPermission()
-            Toast.makeText(this,"تم ضبط الإشعار اليومي $time",Toast.LENGTH_LONG).show()
+            val time=String.format(Locale.US,"%02d:%02d",hour,minute);prefs.edit().putString("daily_time",time).apply()
+            if(continueSetup)pickNotificationDays(true) else rescheduleIfEnabled()
         },h,m,true).show()
     }
 
-    private fun scheduleDailyNotification(hour:Int,minute:Int){
-        val alarm=getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val pi=PendingIntent.getBroadcast(this,7001,Intent(this,DailySummaryReceiver::class.java),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val cal=Calendar.getInstance().apply{
-            set(Calendar.HOUR_OF_DAY,hour);set(Calendar.MINUTE,minute);set(Calendar.SECOND,0);set(Calendar.MILLISECOND,0)
-            if(timeInMillis<=System.currentTimeMillis())add(Calendar.DAY_OF_YEAR,1)
-        }
-        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP,cal.timeInMillis,AlarmManager.INTERVAL_DAY,pi)
+    private fun pickNotificationDays(continueSetup:Boolean=false){
+        val labels=arrayOf("الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت")
+        val values=intArrayOf(Calendar.SUNDAY,Calendar.MONDAY,Calendar.TUESDAY,Calendar.WEDNESDAY,Calendar.THURSDAY,Calendar.FRIDAY,Calendar.SATURDAY)
+        val current=prefs.getString("notify_days","1,2,3,4,5,6,7")!!.split(",").mapNotNull{it.toIntOrNull()}.toMutableSet()
+        val checked=BooleanArray(values.size){values[it] in current}
+        android.app.AlertDialog.Builder(this).setTitle("اختر أيام الإشعار").setMultiChoiceItems(labels,checked){_,which,isChecked->if(isChecked)current.add(values[which]) else current.remove(values[which])}
+            .setPositiveButton("حفظ"){_,_->
+                if(current.isEmpty()){Toast.makeText(this,"اختر يومًا واحدًا على الأقل",Toast.LENGTH_LONG).show();return@setPositiveButton}
+                prefs.edit().putString("notify_days",current.sorted().joinToString(",")).apply();if(continueSetup)pickNotificationItems(true) else rescheduleIfEnabled()
+            }.setNegativeButton("إلغاء",null).show()
     }
 
-    private fun cancelDailyNotification(){
-        prefs.edit().putBoolean("daily_enabled",false).apply()
-        val alarm=getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val pi=PendingIntent.getBroadcast(this,7001,Intent(this,DailySummaryReceiver::class.java),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        alarm.cancel(pi)
+    private fun pickNotificationItems(finalize:Boolean=false){
+        val labels=arrayOf("كل الأسعار","الذهب","الفضة","بيتكوين","الدولار USD","اليورو EUR","الجنيه GBP","الدينار الأردني JOD","الريال السعودي SAR","الدرهم الإماراتي AED","الدينار الكويتي KWD","الريال القطري QAR","الدينار البحريني BHD","الريال العماني OMR")
+        val keys=arrayOf("all","gold","silver","bitcoin","USD","EUR","GBP","JOD","SAR","AED","KWD","QAR","BHD","OMR")
+        val current=prefs.getString("notify_items","gold,silver,bitcoin")!!.split(",").filter{it.isNotBlank()}.toMutableSet()
+        val checked=BooleanArray(keys.size){keys[it] in current}
+        android.app.AlertDialog.Builder(this).setTitle("ماذا تريد في الإشعار؟").setMultiChoiceItems(labels,checked){_,which,isChecked->
+            if(which==0&&isChecked){current.clear();current.add("all")}else if(which==0){current.remove("all")}else{current.remove("all");if(isChecked)current.add(keys[which]) else current.remove(keys[which])}
+        }.setPositiveButton("حفظ"){_,_->
+            if(current.isEmpty()){Toast.makeText(this,"اختر سعرًا واحدًا على الأقل",Toast.LENGTH_LONG).show();return@setPositiveButton}
+            prefs.edit().putString("notify_items",current.joinToString(",")).apply();if(finalize)finishNotificationSetup() else rescheduleIfEnabled()
+        }.setNegativeButton("إلغاء",null).show()
     }
 
-    private fun requestNotificationPermission(){
-        if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
-            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),9001)
-        }
+    private fun finishNotificationSetup(){
+        prefs.edit().putBoolean("daily_enabled",true).apply();requestNotificationPermission();rescheduleIfEnabled();Toast.makeText(this,"تم تفعيل الإشعارات حسب اختياراتك",Toast.LENGTH_LONG).show()
     }
+
+    private fun rescheduleIfEnabled(){
+        if(!prefs.getBoolean("daily_enabled",false))return
+        val hm=prefs.getString("daily_time","20:00")!!.split(":");NotificationScheduler.scheduleNext(this,hm.getOrNull(0)?.toIntOrNull()?:20,hm.getOrNull(1)?.toIntOrNull()?:0)
+    }
+
+    private fun cancelDailyNotification(){prefs.edit().putBoolean("daily_enabled",false).apply();NotificationScheduler.cancel(this)}
+
+    private fun selectedDaysLabel():String{
+        val map=mapOf(1 to "الأحد",2 to "الاثنين",3 to "الثلاثاء",4 to "الأربعاء",5 to "الخميس",6 to "الجمعة",7 to "السبت")
+        return prefs.getString("notify_days","1,2,3,4,5,6,7")!!.split(",").mapNotNull{it.toIntOrNull()?.let(map::get)}.joinToString("، ")
+    }
+
+    private fun summaryItemsLabel():String{
+        val raw=prefs.getString("notify_items","gold,silver,bitcoin")?:"gold,silver,bitcoin";if(raw.split(",").contains("all"))return "كل الأسعار"
+        val map=mapOf("gold" to "الذهب","silver" to "الفضة","bitcoin" to "بيتكوين","USD" to "USD","EUR" to "EUR","GBP" to "GBP","JOD" to "JOD","SAR" to "SAR","AED" to "AED","KWD" to "KWD","QAR" to "QAR","BHD" to "BHD","OMR" to "OMR")
+        return raw.split(",").mapNotNull{map[it]}.joinToString("، ")
+    }
+
+    private fun requestNotificationPermission(){if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),9001)}
 
     inner class AppBridge{
-        @JavascriptInterface fun saveSummary(summary:String,base:String){
-            prefs.edit().putString("daily_summary",summary.take(900)).putString("base_currency",base).apply()
-        }
+        @JavascriptInterface fun saveSummary(summary:String,base:String){prefs.edit().putString("daily_summary",summary.take(900)).putString("base_currency",base).apply()}
+        @JavascriptInterface fun saveSnapshot(snapshot:String,base:String){prefs.edit().putString("market_snapshot",snapshot.take(12000)).putString("base_currency",base).apply()}
     }
 
     private fun injectUiFixes(){
@@ -225,64 +209,11 @@ class MainActivity : Activity() {
             body.charts-page .basePanel,body.charts-page .heroCard,body.charts-page .marketGrid,body.charts-page .currencyScroller,body.charts-page>.wrap>.sectionHead{display:none!important}body.charts-page .hero{display:flex!important}body.charts-page .card{margin-top:12px!important}.chartBox{min-height:210px!important;overflow:hidden!important}canvas{max-width:100%!important;height:auto!important}
             @media(max-width:380px){.wrap{padding:8px!important}.baseTop{align-items:flex-start!important;flex-direction:column!important}.hero{gap:7px!important}.logo{width:42px!important;height:42px!important}h1{font-size:17px!important}.sub{font-size:9px!important}.mp{font-size:20px!important}}
             `;document.head.appendChild(st);
-
-            // Historical lookup must be close to the requested date; otherwise report unavailable.
-            window.nearest=function(points,target){
-              if(!points||!points.length)return null;
-              var t=new Date(target).getTime(),best=null,bd=Infinity;
-              for(var i=0;i<points.length;i++){
-                var pt=new Date(points[i].date+'T12:00:00').getTime();
-                var d=Math.abs(pt-t);if(d<bd){bd=d;best=points[i]}
-              }
-              return bd<=4*86400000?best:null;
-            };
-
-            // Compact dropdown for app currency.
-            window.renderBase=function(){
-              var b=meta(baseCurrency);
-              $('baseName').textContent=b.flag+' '+b.name+' — '+b.code;
-              $('assetCaption').textContent='بالـ '+b.name;
-              $('currencyCaption').textContent='مقابل 1 '+b.code;
-              var select='<select id="baseSelectAndroid" class="baseSelect" aria-label="عملة التطبيق">';
-              for(var i=0;i<CURRENCIES.length;i++){
-                var c=CURRENCIES[i];
-                select+='<option value="'+c.code+'"'+(c.code===baseCurrency?' selected':'')+'>'+c.flag+'  '+c.name+' — '+c.code+'</option>';
-              }
-              select+='</select>';
-              $('baseScroll').innerHTML=select;
-              var el=document.getElementById('baseSelectAndroid');
-              if(el)el.onchange=function(){baseCurrency=this.value;localStorage.setItem('base_currency_v1',baseCurrency);render();toast('تم تغيير عملة التطبيق إلى '+baseCurrency)};
-            };
-
-            // Asset cards: larger labels/icons/prices and day-over-day movement against yesterday.
-            window.renderMarkets=function(){
-              $('marketGrid').innerHTML=Object.entries(METALS).map(function(entry){
-                var k=entry[0],a=entry[1],pts=convertedAssetPoints(k),c=pts.length?pts[pts.length-1].price:null;
-                var target=new Date();target.setDate(target.getDate()-1);
-                var yp=nearest(pts,target);
-                var ch=change(c,yp?yp.price:null);
-                var dp=(k==='bitcoin'&&c>1000)?0:2;
-                if(k==='gold'){$('heroLabel').textContent='سعر الذهب الآن • '+baseCurrency;$('heroPrice').textContent=fmt(c,dp)+' '+baseCurrency;}
-                var move='— <span class="dayLabel">مقارنة بأمس</span>';
-                if(ch.p!=null){
-                  move=(ch.p>0?'▲ ':'▼ ')+fmt(Math.abs(ch.p),2)+'% <span class="dayLabel">مقارنة بأمس</span>';
-                }
-                return '<div class="market '+(selected.type==='asset'&&selected.key===k?'selected':'')+'" style="--accent:'+a.accent+'" data-asset="'+k+'"><span class="mi">'+a.icon+'</span><div class="mn">'+a.name+'</div><div class="mp">'+fmt(c,dp)+' '+baseCurrency+'</div><div class="md '+ch.cls+'">'+move+'</div></div>';
-              }).join('');
-              document.querySelectorAll('[data-asset]').forEach(function(e){e.onclick=function(){selected={type:'asset',key:e.dataset.asset};render();$('detailName').scrollIntoView({behavior:'smooth',block:'center'})}});
-            };
-
-            function enhance(){
-              try{
-                var gold=document.getElementById('heroPrice'),update=document.getElementById('lastUpdate');
-                var fx=[].slice.call(document.querySelectorAll('.fx'),0,4).map(function(x){var a=x.querySelector('.code'),b=x.querySelector('.fxVal');return(a?a.textContent:'')+' '+(b?b.textContent:'')}).join(' • ');
-                var base=localStorage.getItem('base_currency_v1')||'USD';
-                var summary='الذهب '+(gold?gold.textContent:'')+(fx?' | '+fx:'')+(update?' | تحديث '+update.textContent:'');
-                if(window.MarketPulseAndroid)MarketPulseAndroid.saveSummary(summary,base);
-              }catch(e){}
-            }
-            var ob=new MutationObserver(enhance);ob.observe(document.body,{childList:true,subtree:true});
-            enhance();if(window.render)render();
+            window.nearest=function(points,target){if(!points||!points.length)return null;var t=new Date(target).getTime(),best=null,bd=Infinity;for(var i=0;i<points.length;i++){var pt=new Date(points[i].date+'T12:00:00').getTime();var d=Math.abs(pt-t);if(d<bd){bd=d;best=points[i]}}return bd<=4*86400000?best:null;};
+            window.renderBase=function(){var b=meta(baseCurrency);$('baseName').textContent=b.flag+' '+b.name+' — '+b.code;$('assetCaption').textContent='بالـ '+b.name;$('currencyCaption').textContent='مقابل 1 '+b.code;var select='<select id="baseSelectAndroid" class="baseSelect" aria-label="عملة التطبيق">';for(var i=0;i<CURRENCIES.length;i++){var c=CURRENCIES[i];select+='<option value="'+c.code+'"'+(c.code===baseCurrency?' selected':'')+'>'+c.flag+'  '+c.name+' — '+c.code+'</option>';}select+='</select>';$('baseScroll').innerHTML=select;var el=document.getElementById('baseSelectAndroid');if(el)el.onchange=function(){baseCurrency=this.value;localStorage.setItem('base_currency_v1',baseCurrency);render();toast('تم تغيير عملة التطبيق إلى '+baseCurrency)};};
+            window.renderMarkets=function(){$('marketGrid').innerHTML=Object.entries(METALS).map(function(entry){var k=entry[0],a=entry[1],pts=convertedAssetPoints(k),c=pts.length?pts[pts.length-1].price:null;var target=new Date();target.setDate(target.getDate()-1);var yp=nearest(pts,target);var ch=change(c,yp?yp.price:null);var dp=(k==='bitcoin'&&c>1000)?0:2;if(k==='gold'){$('heroLabel').textContent='سعر الذهب الآن • '+baseCurrency;$('heroPrice').textContent=fmt(c,dp)+' '+baseCurrency;}var move='— <span class="dayLabel">مقارنة بأمس</span>';if(ch.p!=null){move=(ch.p>0?'▲ ':'▼ ')+fmt(Math.abs(ch.p),2)+'% <span class="dayLabel">مقارنة بأمس</span>';}return '<div class="market '+(selected.type==='asset'&&selected.key===k?'selected':'')+'" style="--accent:'+a.accent+'" data-asset="'+k+'"><span class="mi">'+a.icon+'</span><div class="mn">'+a.name+'</div><div class="mp">'+fmt(c,dp)+' '+baseCurrency+'</div><div class="md '+ch.cls+'">'+move+'</div></div>';}).join('');document.querySelectorAll('[data-asset]').forEach(function(e){e.onclick=function(){selected={type:'asset',key:e.dataset.asset};render();$('detailName').scrollIntoView({behavior:'smooth',block:'center'})}});};
+            function enhance(){try{var gold=document.getElementById('heroPrice'),update=document.getElementById('lastUpdate');var fx=[].slice.call(document.querySelectorAll('.fx'),0,4).map(function(x){var a=x.querySelector('.code'),b=x.querySelector('.fxVal');return(a?a.textContent:'')+' '+(b?b.textContent:'')}).join(' • ');var base=localStorage.getItem('base_currency_v1')||'USD';var summary='الذهب '+(gold?gold.textContent:'')+(fx?' | '+fx:'')+(update?' | تحديث '+update.textContent:'');if(window.MarketPulseAndroid){MarketPulseAndroid.saveSummary(summary,base);var items=[];document.querySelectorAll('.market[data-asset]').forEach(function(x){items.push({key:x.getAttribute('data-asset'),name:(x.querySelector('.mn')||{}).textContent||'',price:(x.querySelector('.mp')||{}).textContent||'',change:((x.querySelector('.md')||{}).textContent||'').replace('مقارنة بأمس','').trim()});});document.querySelectorAll('.fx').forEach(function(x){var code=(x.querySelector('.code')||{}).textContent||'';if(code)items.push({key:code.trim(),name:code.trim(),price:(x.querySelector('.fxVal')||{}).textContent||'',change:''});});MarketPulseAndroid.saveSnapshot(JSON.stringify(items),base);}}catch(e){}}
+            var ob=new MutationObserver(enhance);ob.observe(document.body,{childList:true,subtree:true});enhance();if(window.render)render();
           }catch(e){console.log(e)}
         })();
         """.trimIndent()
