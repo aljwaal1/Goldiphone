@@ -38,8 +38,8 @@ class MainActivity : Activity() {
         IntroPage("✦","كل السوق في شاشة واحدة","تابع الذهب والعملات بثقة","ذهب وفضة وبيتكوين وعملات عربية وعالمية في واجهة واحدة سريعة وواضحة.",Color.rgb(255,207,85),Color.rgb(255,139,74)),
         IntroPage("↕","عملة التطبيق","اختر العملة التي تناسبك","الدولار افتراضيًا، ويمكن تغيير العملة من قائمة منسدلة واضحة دون استهلاك مساحة الشاشة.",Color.rgb(67,216,255),Color.rgb(88,126,255)),
         IntroPage("⌁","تحليل زمني حقيقي","اعرف أين كان السعر","التغير في بطاقات الأصول يقارن بسعر أمس، والتحليل التاريخي لا يعرض نقطة غير متوفرة كأنها حقيقية.",Color.rgb(155,124,255),Color.rgb(218,92,255)),
-        IntroPage("🔕","أنت تتحكم بالإشعارات","لا إزعاج دون اختيارك","لن يرسل التطبيق أي إشعار تلقائيًا. أنت تحدد تاريخ البدء والوقت والأيام التي تريد وصول الإشعار فيها.",Color.rgb(75,229,167),Color.rgb(67,216,255)),
-        IntroPage("🎯","إشعار حسب اهتمامك","اختر الأسعار التي تريدها","يمكنك اختيار كل الأسعار، أو الذهب والفضة والبيتكوين، أو عملات محددة فقط. الإشعار يعرض ما اخترته أنت.",Color.rgb(255,196,80),Color.rgb(255,126,90)),
+        IntroPage("🔕","أنت تتحكم بالإشعارات","لا إزعاج دون اختيارك","لن يرسل التطبيق أي إشعار تلقائيًا. أنت تحدد تاريخ البدء والوقت والأيام التي تريد وصول الإشعار فيها، ويمكنك تعديلها أو إيقافها في أي وقت.",Color.rgb(75,229,167),Color.rgb(67,216,255)),
+        IntroPage("🎯","إشعار حسب اهتمامك","اختر الأسعار التي تريدها","يمكنك اختيار كل الأسعار، أو الذهب والفضة والبيتكوين، أو عملات محددة فقط. ويمكن تعديل الاختيارات لاحقًا من قسم الإشعارات.",Color.rgb(255,196,80),Color.rgb(255,126,90)),
         IntroPage("✉","الدعم والتواصل","المطور قريب منك","يمكنك مراسلة المطور في أي وقت من أيقونة المراسلة في الشريط السفلي.",Color.rgb(255,157,76),Color.rgb(155,124,255))
     )
 
@@ -85,11 +85,11 @@ class MainActivity : Activity() {
             setBackgroundColor(Color.rgb(8,9,19));overScrollMode=View.OVER_SCROLL_NEVER;isVerticalScrollBarEnabled=false;isHorizontalScrollBarEnabled=false
             setLayerType(View.LAYER_TYPE_HARDWARE,null);addJavascriptInterface(AppBridge(),"MarketPulseAndroid");webChromeClient=WebChromeClient()
             webViewClient=object:WebViewClient(){override fun onPageFinished(v:WebView?,u:String?){injectUiFixes()}}
-            settings.apply{javaScriptEnabled=true;domStorageEnabled=true;databaseEnabled=true;cacheMode=WebSettings.LOAD_NO_CACHE;builtInZoomControls=false;displayZoomControls=false;setSupportZoom(false);loadWithOverviewMode=true;useWideViewPort=false;allowFileAccess=false;allowContentAccess=false;mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW;userAgentString="$userAgentString MarketPulseAndroid/2.3"}
+            settings.apply{javaScriptEnabled=true;domStorageEnabled=true;databaseEnabled=true;cacheMode=WebSettings.LOAD_NO_CACHE;builtInZoomControls=false;displayZoomControls=false;setSupportZoom(false);loadWithOverviewMode=true;useWideViewPort=false;allowFileAccess=false;allowContentAccess=false;mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW;userAgentString="$userAgentString MarketPulseAndroid/2.3.1"}
             clearCache(true)
         }
         root.addView(webView,LinearLayout.LayoutParams(-1,0,1f));bottomBar=createBottomBar();root.addView(bottomBar,LinearLayout.LayoutParams(-1,dp(64)));setContentView(root)
-        if(saved==null)webView.loadUrl("https://aljwaal1.github.io/Goldiphone/?app=android&v=23") else webView.restoreState(saved)
+        if(saved==null)webView.loadUrl("https://aljwaal1.github.io/Goldiphone/?app=android&v=231") else webView.restoreState(saved)
     }
 
     private fun createBottomBar():LinearLayout{
@@ -103,18 +103,47 @@ class MainActivity : Activity() {
     private fun showChartsPage(){webView.evaluateJavascript("document.body.classList.add('charts-page');var c=document.querySelector('.card');if(c)c.scrollIntoView({block:'start'});",null)}
 
     private fun showNotificationSettings(){
-        if(!prefs.getBoolean("daily_enabled",false)){
-            android.app.AlertDialog.Builder(this).setTitle("إعداد الإشعارات")
-                .setMessage("لن يصلك أي إشعار قبل أن تختار تاريخ البدء والوقت والأيام والأسعار التي تريدها.")
-                .setPositiveButton("إعداد الإشعار"){_,_->pickStartDate(true)}.setNegativeButton("إلغاء",null).show()
-            return
+        val enabled=prefs.getBoolean("daily_enabled",false)
+        val panel=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(18),dp(4),dp(18),dp(8))}
+        panel.addView(TextView(this).apply{
+            text=if(enabled) "● الإشعارات مفعّلة\nمن ${prefs.getString("notify_start_date","—")}  •  ${prefs.getString("daily_time","—")}\n${selectedDaysLabel()}\n${summaryItemsLabel()}" else "○ الإشعارات متوقفة\nلن يصلك أي إشعار حتى تقوم بتفعيلها بنفسك."
+            setTextColor(if(enabled) Color.rgb(53,190,132) else Color.rgb(120,126,145));textSize=14f;setPadding(0,dp(4),0,dp(12))
+        })
+        lateinit var dialog:android.app.AlertDialog
+        fun addAction(title:String,action:()->Unit){
+            panel.addView(Button(this).apply{
+                text=title;isAllCaps=false;textSize=14f;gravity=Gravity.CENTER_VERTICAL or Gravity.START;setTextColor(Color.WHITE)
+                background=gradient(Color.rgb(31,35,58),Color.rgb(20,23,41),18f)
+                setOnClickListener{dialog.dismiss();action()}
+            },LinearLayout.LayoutParams(-1,dp(52)).apply{bottomMargin=dp(8)})
         }
-        val items=summaryItemsLabel()
-        val msg="مفعّل من ${prefs.getString("notify_start_date","—")} • الساعة ${prefs.getString("daily_time","—")}\nالأيام: ${selectedDaysLabel()}\nالمحتوى: $items"
-        val options=arrayOf("تغيير تاريخ البدء","تغيير الوقت","اختيار الأيام","اختيار محتوى الإشعار","إيقاف الإشعارات")
-        android.app.AlertDialog.Builder(this).setTitle("إعدادات الإشعارات").setMessage(msg).setItems(options){_,which->
-            when(which){0->pickStartDate(false);1->pickNotificationTime(false);2->pickNotificationDays(false);3->pickNotificationItems(false);4->{cancelDailyNotification();Toast.makeText(this,"تم إيقاف الإشعارات",Toast.LENGTH_SHORT).show()}}
-        }.setNegativeButton("إغلاق",null).show()
+        if(enabled){
+            addAction("📅  تعديل تاريخ البدء  •  ${prefs.getString("notify_start_date","—")}"){pickStartDate(false)}
+            addAction("🕒  تعديل وقت الإشعار  •  ${prefs.getString("daily_time","—")}"){pickNotificationTime(false)}
+            addAction("📆  تعديل أيام الإشعار"){pickNotificationDays(false)}
+            addAction("🎯  تعديل الأسعار التي تظهر في الإشعار"){pickNotificationItems(false)}
+            addAction("⏸  إيقاف الإشعارات مع الاحتفاظ بالإعدادات"){
+                cancelDailyNotification();Toast.makeText(this,"تم إيقاف الإشعارات ويمكنك تفعيلها لاحقًا",Toast.LENGTH_LONG).show();showNotificationSettings()
+            }
+            addAction("🗑  حذف جدول الإشعارات بالكامل"){
+                NotificationScheduler.cancel(this)
+                prefs.edit().putBoolean("daily_enabled",false).remove("notify_start_date").remove("daily_time").remove("notify_days").remove("notify_items").apply()
+                Toast.makeText(this,"تم حذف جدول الإشعارات",Toast.LENGTH_LONG).show();showNotificationSettings()
+            }
+        }else{
+            addAction("🔔  إعداد وتفعيل الإشعارات"){
+                if(prefs.contains("daily_time")&&prefs.contains("notify_start_date")){
+                    prefs.edit().putBoolean("daily_enabled",true).apply();requestNotificationPermission();rescheduleIfEnabled();Toast.makeText(this,"تم تفعيل الإشعارات من جديد",Toast.LENGTH_LONG).show();showNotificationSettings()
+                }else pickStartDate(true)
+            }
+            if(prefs.contains("daily_time")||prefs.contains("notify_start_date")){
+                addAction("✏  تعديل الإعدادات المحفوظة قبل التفعيل"){
+                    prefs.edit().putBoolean("daily_enabled",true).apply();showNotificationSettings()
+                }
+            }
+        }
+        dialog=android.app.AlertDialog.Builder(this).setTitle("🔔 إدارة الإشعارات").setView(panel).setNegativeButton("إغلاق",null).create()
+        dialog.show()
     }
 
     private fun pickStartDate(continueSetup:Boolean){
@@ -124,7 +153,7 @@ class MainActivity : Activity() {
         val dialog=DatePickerDialog(this,{_,y,m,d->
             val value=String.format(Locale.US,"%04d-%02d-%02d",y,m+1,d)
             prefs.edit().putString("notify_start_date",value).apply()
-            if(continueSetup)pickNotificationTime(true) else rescheduleIfEnabled()
+            if(continueSetup)pickNotificationTime(true) else{rescheduleIfEnabled();showNotificationSettings()}
         },cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH))
         dialog.datePicker.minDate=Calendar.getInstance().apply{set(Calendar.HOUR_OF_DAY,0);set(Calendar.MINUTE,0);set(Calendar.SECOND,0);set(Calendar.MILLISECOND,0)}.timeInMillis
         dialog.show()
@@ -134,7 +163,7 @@ class MainActivity : Activity() {
         val saved=prefs.getString("daily_time",null)?.split(":");val h=saved?.getOrNull(0)?.toIntOrNull()?:20;val m=saved?.getOrNull(1)?.toIntOrNull()?:0
         TimePickerDialog(this,{_,hour,minute->
             val time=String.format(Locale.US,"%02d:%02d",hour,minute);prefs.edit().putString("daily_time",time).apply()
-            if(continueSetup)pickNotificationDays(true) else rescheduleIfEnabled()
+            if(continueSetup)pickNotificationDays(true) else{rescheduleIfEnabled();showNotificationSettings()}
         },h,m,true).show()
     }
 
@@ -146,8 +175,8 @@ class MainActivity : Activity() {
         android.app.AlertDialog.Builder(this).setTitle("اختر أيام الإشعار").setMultiChoiceItems(labels,checked){_,which,isChecked->if(isChecked)current.add(values[which]) else current.remove(values[which])}
             .setPositiveButton("حفظ"){_,_->
                 if(current.isEmpty()){Toast.makeText(this,"اختر يومًا واحدًا على الأقل",Toast.LENGTH_LONG).show();return@setPositiveButton}
-                prefs.edit().putString("notify_days",current.sorted().joinToString(",")).apply();if(continueSetup)pickNotificationItems(true) else rescheduleIfEnabled()
-            }.setNegativeButton("إلغاء",null).show()
+                prefs.edit().putString("notify_days",current.sorted().joinToString(",")).apply();if(continueSetup)pickNotificationItems(true) else{rescheduleIfEnabled();showNotificationSettings()}
+            }.setNegativeButton("إلغاء"){_,_->if(!continueSetup)showNotificationSettings()}.show()
     }
 
     private fun pickNotificationItems(finalize:Boolean=false){
@@ -159,12 +188,12 @@ class MainActivity : Activity() {
             if(which==0&&isChecked){current.clear();current.add("all")}else if(which==0){current.remove("all")}else{current.remove("all");if(isChecked)current.add(keys[which]) else current.remove(keys[which])}
         }.setPositiveButton("حفظ"){_,_->
             if(current.isEmpty()){Toast.makeText(this,"اختر سعرًا واحدًا على الأقل",Toast.LENGTH_LONG).show();return@setPositiveButton}
-            prefs.edit().putString("notify_items",current.joinToString(",")).apply();if(finalize)finishNotificationSetup() else rescheduleIfEnabled()
-        }.setNegativeButton("إلغاء",null).show()
+            prefs.edit().putString("notify_items",current.joinToString(",")).apply();if(finalize)finishNotificationSetup() else{rescheduleIfEnabled();showNotificationSettings()}
+        }.setNegativeButton("إلغاء"){_,_->if(!finalize)showNotificationSettings()}.show()
     }
 
     private fun finishNotificationSetup(){
-        prefs.edit().putBoolean("daily_enabled",true).apply();requestNotificationPermission();rescheduleIfEnabled();Toast.makeText(this,"تم تفعيل الإشعارات حسب اختياراتك",Toast.LENGTH_LONG).show()
+        prefs.edit().putBoolean("daily_enabled",true).apply();requestNotificationPermission();rescheduleIfEnabled();Toast.makeText(this,"تم تفعيل الإشعارات حسب اختياراتك",Toast.LENGTH_LONG).show();showNotificationSettings()
     }
 
     private fun rescheduleIfEnabled(){
